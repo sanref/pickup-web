@@ -1,0 +1,181 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/*
+ * Sistema de diseño Organic.
+ * Los valores salen literalmente de _handoff/design_handoff_pickup_mvp/styles.css.
+ * No inventar valores nuevos: si hace falta un color, usar un paso de las rampas.
+ */
+
+@theme {
+  /* Rampas tonales (100–900). */
+  --color-neutral-100: #f9f4ed;
+  --color-neutral-200: #eee7db;
+  --color-neutral-300: #dcd3c4;
+  --color-neutral-400: #c0b6a5;
+  --color-neutral-500: #a19786;
+  --color-neutral-600: #82796a;
+  --color-neutral-700: #645c50;
+  --color-neutral-800: #474238;
+  --color-neutral-900: #2e2b25;
+
+  --color-accent-100: #fff2eb;
+  --color-accent-200: #ffe1d0;
+  --color-accent-300: #ffc6a5;
+  --color-accent-400: #f6a06b;
+  --color-accent-500: #d67f48;
+  --color-accent-600: #b2622d;
+  --color-accent-700: #8c491a;
+  --color-accent-800: #643312;
+  --color-accent-900: #402310;
+
+  --color-accent-2: #7a8a5e;
+  --color-accent-2-100: #f0fae1;
+  --color-accent-2-200: #e1eecc;
+  --color-accent-2-300: #ccdbb2;
+  --color-accent-2-400: #aebf92;
+  --color-accent-2-500: #8fa073;
+  --color-accent-2-600: #728157;
+  --color-accent-2-700: #56633f;
+  --color-accent-2-800: #3d472b;
+  --color-accent-2-900: #272e1b;
+
+  --color-surface: #ebddc5;
+  --color-divider: color-mix(in srgb, #201e1d 16%, transparent);
+
+  /* Radios: tarjetas 16px, contenedores grandes y mapas 28px, controles en píldora (rounded-full). */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 28px;
+
+  /* Elevación. */
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #2e2b25 14%, transparent);
+  --shadow-md: 0 3px 10px color-mix(in srgb, #2e2b25 16%, transparent);
+  --shadow-lg: 0 12px 32px color-mix(in srgb, #2e2b25 22%, transparent);
+}
+
+@theme inline {
+  --font-sans: var(--font-figtree), system-ui, sans-serif;
+  --font-heading: var(--font-caprasimo), system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  /* En Organic, "accent" es la terracota (no el gris de hover de shadcn). */
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+:root {
+  /* Espaciado Organic (densidad 1.10×). Uso: p-(--space-3), gap-(--space-2). */
+  --space-1: 4.4px;
+  --space-2: 8.8px;
+  --space-3: 13.2px;
+  --space-4: 17.6px;
+  --space-6: 26.4px;
+  --space-8: 35.2px;
+
+  --background: #f5ead8;
+  --foreground: #201e1d;
+  --card: #ebddc5;
+  --card-foreground: #201e1d;
+  --popover: #f9f4ed;
+  --popover-foreground: #201e1d;
+  --primary: #c67139;
+  --primary-foreground: #f5ead8;
+  --secondary: #eee7db;
+  --secondary-foreground: #201e1d;
+  --muted: #eee7db;
+  --muted-foreground: #645c50;
+  --accent: #c67139;
+  --accent-foreground: #f5ead8;
+  --destructive: #8c491a;
+  --border: color-mix(in srgb, #201e1d 16%, transparent);
+  --input: #dcd3c4;
+  --ring: #c67139;
+  --radius: 16px;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    /* Caprasimo tiene un solo peso: nunca ponerle bold. */
+    font-family: var(--font-heading);
+    font-weight: 400;
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+  }
+
+  a {
+    text-underline-offset: 3px;
+  }
+
+  :focus {
+    outline: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* Iconos Lucide con trazo más grueso y redondo. */
+  .lucide {
+    stroke-width: 2.75;
+  }
+}
+
+@layer utilities {
+  /* Toda fotografía de contenido pasa por este filtro. */
+  .washed {
+    filter: saturate(0.6) contrast(0.85) brightness(1.1) opacity(0.94);
+  }
+
+  /* Etiqueta de 11px en mayúsculas ("DEPORTE", "CUÁNDO"). */
+  .label-caps {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}
