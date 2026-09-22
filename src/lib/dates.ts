@@ -12,12 +12,20 @@ function part(date: Date, timeZone: string, options: Intl.DateTimeFormatOptions,
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
+/** "Jue" */
+export function formatShortWeekday(date: Date, timeZone: string): string {
+  return capitalize(part(date, timeZone, { weekday: "short" }, "weekday").replace(".", ""));
+}
+
+/** "24" */
+export function formatDayOfMonth(date: Date, timeZone: string): string {
+  return part(date, timeZone, { day: "numeric" }, "day");
+}
+
 /** "Jue 24/9" */
 export function formatSlotDay(date: Date, timeZone: string): string {
-  const weekday = part(date, timeZone, { weekday: "short" }, "weekday").replace(".", "");
-  const day = part(date, timeZone, { day: "numeric" }, "day");
   const month = part(date, timeZone, { month: "numeric" }, "month");
-  return `${capitalize(weekday)} ${day}/${month}`;
+  return `${formatShortWeekday(date, timeZone)} ${formatDayOfMonth(date, timeZone)}/${month}`;
 }
 
 /** "20:00" */

@@ -124,7 +124,7 @@ function Empty({ title, text }: { title: string; text: string }) {
           <Link href="/partidos/nuevo">Crear partido</Link>
         </Button>
         <Button asChild variant="secondary">
-          <Link href="/sedes">Ver sedes</Link>
+          <Link href="/explorar">Buscar partidos</Link>
         </Button>
       </div>
     </div>

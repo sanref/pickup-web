@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatSlotDay, formatTime, formatWeekday, zonedToUtc } from "@/lib/dates";
+import { formatDayOfMonth, formatShortWeekday, formatSlotDay, formatTime, formatWeekday, zonedToUtc } from "@/lib/dates";
 
 const TZ = "America/Argentina/Cordoba";
 
@@ -20,6 +20,8 @@ describe("formato en la zona de la sede", () => {
     expect(formatSlotDay(instant, TZ)).toBe("Jue 24/9");
     expect(formatTime(instant, TZ)).toBe("20:00");
     expect(formatWeekday(instant, TZ)).toBe("jueves");
+    expect(formatShortWeekday(instant, TZ)).toBe("Jue");
+    expect(formatDayOfMonth(instant, TZ)).toBe("24");
   });
 
   it("es ida y vuelta con zonedToUtc", () => {

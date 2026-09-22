@@ -105,7 +105,7 @@ async function canView(tx: Tx | typeof db, actor: Actor | null, match: AccessRow
 }
 
 // Sin sesión se muestra solo el nombre de pila (plan: privacidad de los participantes).
-function publicName(name: string, loggedIn: boolean): string {
+export function publicName(name: string, loggedIn: boolean): string {
   return loggedIn ? name : (name.trim().split(/\s+/)[0] ?? name);
 }
 

@@ -45,10 +45,12 @@ export function StatusTag({ status }: { status: string }) {
   return <Badge variant={s.variant}>{s.label}</Badge>;
 }
 
+export const missingText = (missing: number) => (missing === 1 ? "falta 1" : `faltan ${missing}`);
+
 // Siempre tag terracota; singular y plural.
 export function MissingCount({ missing }: { missing: number }) {
   if (missing <= 0) return null;
-  return <Badge variant="accent">{missing === 1 ? "falta 1" : `faltan ${missing}`}</Badge>;
+  return <Badge variant="accent">{missingText(missing)}</Badge>;
 }
 
 export function VoteMark({ voted, className }: { voted: boolean; className?: string }) {
@@ -61,15 +63,21 @@ export function VoteMark({ voted, className }: { voted: boolean; className?: str
   );
 }
 
+// El borde de cada avatar toma el color de lo que hay detrás (`edgeClassName`), para que se lean superpuestos.
 export function AvatarStack({
   people,
   max = 5,
+  total = people.length,
+  edgeClassName = "border-background",
 }: {
   people: { userId: string; displayName: string; avatarUrl: string | null }[];
   max?: number;
+  /** Cantidad real si `people` trae solo los primeros. */
+  total?: number;
+  edgeClassName?: string;
 }) {
   const shown = people.slice(0, max);
-  const rest = people.length - shown.length;
+  const rest = total - shown.length;
   return (
     <div className="flex items-center">
       {shown.map((p, i) => (
@@ -77,12 +85,12 @@ export function AvatarStack({
           key={p.userId}
           name={p.displayName}
           src={p.avatarUrl}
-          className={cn("size-[26px] border-2 border-background", i > 0 && "-ml-2")}
+          className={cn("size-[26px] border-2", edgeClassName, i > 0 && "-ml-2")}
           textClassName="text-[10px]"
         />
       ))}
       {rest > 0 && (
-        <span className="-ml-2 grid size-[26px] place-items-center rounded-full border-2 border-background bg-neutral-300 text-[10px] font-semibold">
+        <span className={cn("-ml-2 grid size-[26px] place-items-center rounded-full border-2 bg-neutral-300 text-[10px] font-semibold", edgeClassName)}>
           +{rest}
         </span>
       )}

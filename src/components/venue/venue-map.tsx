@@ -2,18 +2,19 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { DEFAULT_CENTER, GOOGLE_MAP_ID, loadGoogleMaps } from "@/lib/google-maps";
+import { DEFAULT_CENTER } from "@/lib/geo";
+import { GOOGLE_MAP_ID, loadGoogleMaps } from "@/lib/google-maps";
 
 export type MapPin = { id: string; lat: number; lng: number; label: string };
 
 // Pin del handoff: píldora con el texto y un punto debajo. Activo = terracota; inactivo = surface con punto salvia.
-function pinElement(label: string, active: boolean): HTMLElement {
+export function pinElement(label: string, active: boolean): HTMLElement {
   const root = document.createElement("div");
   root.className = "flex flex-col items-center gap-1";
   const pill = document.createElement("div");
   pill.className = cn(
-    "rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap shadow-md transition-colors duration-150",
-    active ? "bg-accent text-background" : "bg-surface text-foreground",
+    "rounded-full px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-colors duration-150",
+    active ? "bg-accent text-background shadow-md" : "bg-surface text-foreground shadow-sm",
   );
   pill.textContent = label;
   const dot = document.createElement("div");
@@ -81,7 +82,7 @@ export function VenueMap({
         content: pinElement(pin.label, pin.id === activeId),
         zIndex: pin.id === activeId ? 10 : 1,
       });
-      if (onPinClick) marker.addListener("gmp-click", () => onPinClick(pin.id));
+      if (onPinClick) marker.addEventListener("gmp-click", () => onPinClick(pin.id));
       return marker;
     });
 

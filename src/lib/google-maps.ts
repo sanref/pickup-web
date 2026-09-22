@@ -18,6 +18,3 @@ export function loadGoogleMaps<T extends keyof google.maps.ImportLibraryMap>(lib
 // Los marcadores HTML (AdvancedMarkerElement) exigen un Map ID. DEMO_MAP_ID sirve para desarrollo;
 // en producción se crea uno propio en Google Cloud (gratis) y se carga en la variable.
 export const GOOGLE_MAP_ID = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || "DEMO_MAP_ID";
-
-// Rosario: ciudad piloto, centro por defecto de mapas y búsquedas.
-export const DEFAULT_CENTER = { lat: -32.9468, lng: -60.6393 };

@@ -11,6 +11,7 @@ export function Segmented<T extends string>({
   onChange,
   label,
   size = "md",
+  orientation = "horizontal",
 }: {
   name: string;
   value: T | null;
@@ -18,9 +19,20 @@ export function Segmented<T extends string>({
   onChange: (value: T) => void;
   label: string;
   size?: "sm" | "md";
+  /** Vertical: opciones apiladas con divisorias horizontales (filtros de /explorar). */
+  orientation?: "horizontal" | "vertical";
 }) {
+  const vertical = orientation === "vertical";
   return (
-    <div role="radiogroup" aria-label={label} className="inline-flex w-fit overflow-hidden rounded-full border border-divider">
+    <div
+      role="radiogroup"
+      aria-label={label}
+      aria-orientation={orientation}
+      className={cn(
+        "inline-flex overflow-hidden border border-divider",
+        vertical ? "w-full flex-col rounded-lg" : "w-fit rounded-full",
+      )}
+    >
       {options.map((option) => {
         const checked = option.value === value;
         return (
@@ -29,7 +41,7 @@ export function Segmented<T extends string>({
             className={cn(
               "relative inline-flex min-h-11 cursor-pointer items-center px-3 transition-colors duration-150 ease-out sm:min-h-0",
               size === "sm" ? "py-1.5 text-xs" : "py-[7px] text-[13px]",
-              "[&+&]:border-l [&+&]:border-divider",
+              vertical ? "[&+&]:border-t [&+&]:border-divider" : "[&+&]:border-l [&+&]:border-divider",
               "has-[input:focus-visible]:outline-2 has-[input:focus-visible]:-outline-offset-2 has-[input:focus-visible]:outline-accent",
               checked ? "bg-accent text-background" : "hover:bg-foreground/7",
             )}
