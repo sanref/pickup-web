@@ -38,5 +38,5 @@ El esquema se define con **scripts SQL numerados** en `db/evolution/` (fuente de
 ```bash
 npm run typecheck
 npm run lint
-npm test          # los tests de integración corren si hay TEST_DATABASE_URL
+npm test          # unitarios; los de integración corren si hay TEST_DATABASE_URL / TEST_NEON_DATABASE_URL (ver .env.example)
 ```
