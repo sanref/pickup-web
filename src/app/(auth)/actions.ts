@@ -1,10 +1,10 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { safeNext, withNext } from "@/lib/safe-next";
 import { auth } from "@/server/auth/neon";
+import { requestOrigin } from "@/server/request-origin";
 import { ensureProfile } from "@/server/services/profiles";
 
 export type AuthFormState = { error?: string; notice?: string; email?: string } | undefined;
@@ -56,13 +56,6 @@ function describe(error: AuthError): string {
   return "No pudimos completar la operación. Probá de nuevo.";
 }
 
-async function origin(): Promise<string> {
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  const proto = h.get("x-forwarded-proto") ?? (host?.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}`;
-}
-
 const email = z.string().trim().toLowerCase().email("Revisá el email.");
 const password = z.string().min(8, "La contraseña tiene que tener al menos 8 caracteres.").max(128);
 const otp = z.string().trim().regex(/^\d{6}$/, "El código tiene 6 números.");
@@ -111,7 +104,7 @@ export async function signUpWithEmail(_prev: AuthFormState, form: FormData): Pro
 
 export async function signInWithGoogle(form: FormData) {
   const next = safeNext(form.get("next"));
-  const callbackURL = `${await origin()}${withNext("/auth/callback", next)}`;
+  const callbackURL = `${await requestOrigin()}${withNext("/auth/callback", next)}`;
   const { data, error } = await auth.signIn.social({ provider: "google", callbackURL });
   if (error || !data?.url) redirect(withNext("/login?error=google", next));
   redirect(data.url);

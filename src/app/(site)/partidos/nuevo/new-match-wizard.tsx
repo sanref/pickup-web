@@ -1,0 +1,364 @@
+"use client";
+
+import { Plus, X } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState, useTransition } from "react";
+import { Field, FormMessage } from "@/components/auth/auth-card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Segmented } from "@/components/ui/segmented";
+import { VenueCard } from "@/components/venue/venue-card";
+import { todayIn } from "@/lib/dates";
+import { cn } from "@/lib/utils";
+import { DURATIONS, MAX_SLOTS, type SlotInput } from "@/lib/validations/match";
+import { SKILL_LEVEL_LABELS, SKILL_LEVELS, type SkillLevel } from "@/lib/validations/profile";
+import type { Sport } from "@/server/services/profiles";
+import type { VenueSummary } from "@/server/services/venues";
+import { createMatchAction, searchVenuesForMatchAction } from "./actions";
+
+const STEPS = [
+  { title: "¿Qué se juega?", description: "Elegí el deporte. El cupo sugerido lo podés cambiar al final." },
+  { title: "¿Dónde?", description: "Buscá la cancha en el catálogo." },
+  { title: "¿Cuándo?", description: `Proponé hasta ${MAX_SLOTS} horarios posibles. Cada uno vota los que le sirven.` },
+  { title: "Detalles", description: "Lo último antes de publicarlo." },
+] as const;
+
+// Duración típica de un turno según el deporte.
+const DEFAULT_DURATION: Record<string, SlotInput["durationMinutes"]> = { padel: 90, voley: 90 };
+const LEVEL_OPTIONS = [
+  { value: "any" as const, label: "Cualquiera" },
+  ...SKILL_LEVELS.map((value) => ({ value, label: SKILL_LEVEL_LABELS[value].long })),
+];
+const TIMEZONE = "America/Argentina/Buenos_Aires";
+
+type Draft = {
+  sportId: number | null;
+  venue: VenueSummary | null;
+  slots: SlotInput[];
+  title: string;
+  description: string;
+  capacity: string;
+  level: SkillLevel | "any";
+  price: string;
+  visibility: "public" | "private";
+};
+
+export function NewMatchWizard({
+  sports,
+  preferredSportId,
+  presetVenue,
+}: {
+  sports: Sport[];
+  preferredSportId: number | null;
+  presetVenue: VenueSummary | null;
+}) {
+  const presetSport = presetVenue?.sports.length === 1 ? presetVenue.sports[0].id : preferredSportId;
+  const [step, setStep] = useState(presetVenue && presetSport ? 2 : 0);
+  const [draft, setDraft] = useState<Draft>(() => {
+    const sport = sports.find((s) => s.id === presetSport);
+    return {
+      sportId: presetSport,
+      venue: presetVenue,
+      slots: [{ date: "", time: "20:00", durationMinutes: DEFAULT_DURATION[sport?.slug ?? ""] ?? 60 }],
+      title: "",
+      description: "",
+      capacity: sport ? String(sport.defaultCapacity) : "",
+      level: "any",
+      price: "",
+      visibility: "public",
+    };
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+  const sport = sports.find((s) => s.id === draft.sportId) ?? null;
+  const today = todayIn(TIMEZONE);
+
+  function update(patch: Partial<Draft>) {
+    setDraft((d) => ({ ...d, ...patch }));
+  }
+
+  function chooseSport(s: Sport) {
+    const duration = DEFAULT_DURATION[s.slug] ?? 60;
+    update({
+      sportId: s.id,
+      capacity: String(s.defaultCapacity),
+      slots: draft.slots.map((slot) => ({ ...slot, durationMinutes: duration })),
+      venue: draft.venue && draft.venue.sports.some((vs) => vs.id === s.id) ? draft.venue : null,
+    });
+  }
+
+  function validate(): string | null {
+    if (step === 0 && !draft.sportId) return "Elegí un deporte.";
+    if (step === 1 && !draft.venue) return "Elegí la sede.";
+    if (step === 2) {
+      if (draft.slots.some((s) => !s.date || !s.time)) return "Completá la fecha y la hora de cada horario.";
+      const keys = draft.slots.map((s) => `${s.date} ${s.time}`);
+      if (new Set(keys).size !== keys.length) return "Hay dos horarios iguales.";
+    }
+    if (step === 3) {
+      const capacity = Number(draft.capacity);
+      if (!Number.isInteger(capacity) || capacity < 2 || capacity > 30) return "El cupo tiene que ser entre 2 y 30.";
+      if (draft.price && !(Number(draft.price) >= 0)) return "Revisá el precio.";
+    }
+    return null;
+  }
+
+  function next(event: React.FormEvent) {
+    event.preventDefault();
+    const problem = validate();
+    setError(problem);
+    if (problem) return;
+    if (step === 2 && !draft.title && sport && draft.venue) {
+      update({ title: `${sport.name} en ${draft.venue.name}`.slice(0, 80) });
+    }
+    if (step < STEPS.length - 1) {
+      setStep(step + 1);
+      return;
+    }
+    startTransition(async () => {
+      const result = await createMatchAction({
+        sportId: draft.sportId,
+        venueId: draft.venue?.id,
+        title: draft.title,
+        description: draft.description,
+        capacity: Number(draft.capacity),
+        level: draft.level === "any" ? null : draft.level,
+        pricePerPerson: draft.price === "" ? null : Number(draft.price),
+        visibility: draft.visibility,
+        slots: draft.slots,
+      });
+      if (result?.error) setError(result.error);
+    });
+  }
+
+  const current = STEPS[step];
+
+  return (
+    <form
+      onSubmit={next}
+      className="mx-auto flex w-full max-w-[720px] flex-col gap-5 rounded-lg bg-background px-5 py-7 shadow-lg sm:p-[34px]"
+    >
+      <div className="flex gap-1.5" role="progressbar" aria-label={`Paso ${step + 1} de ${STEPS.length}`} aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1}>
+        {STEPS.map((s, i) => (
+          <div key={s.title} className={cn("h-1.5 flex-1 rounded-full transition-colors duration-150", i <= step ? "bg-accent" : "bg-neutral-300")} />
+        ))}
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <h1 className="m-0 font-heading text-[30px] leading-tight">{current.title}</h1>
+        <p className="m-0 text-sm text-neutral-800">{current.description}</p>
+      </div>
+
+      <FormMessage kind="error">{error}</FormMessage>
+
+      {step === 0 && (
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Deporte">
+          {sports.map((s) => {
+            const on = s.id === draft.sportId;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                role="radio"
+                aria-checked={on}
+                onClick={() => chooseSport(s)}
+                className={cn(
+                  "min-h-11 rounded-full px-4 text-sm transition-colors duration-150",
+                  on ? "bg-accent text-background" : "bg-neutral-100 text-neutral-800 hover:bg-neutral-200",
+                )}
+              >
+                {s.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {step === 1 && <VenueStep sportId={draft.sportId} selected={draft.venue} onSelect={(venue) => update({ venue })} />}
+
+      {step === 2 && (
+        <div className="flex flex-col gap-3">
+          {draft.slots.map((slot, i) => (
+            <div key={i} className="flex flex-wrap items-end gap-3 rounded-md bg-neutral-100 p-3.5">
+              <Field id={`date-${i}`} label="Fecha">
+                <Input
+                  id={`date-${i}`}
+                  type="date"
+                  min={today}
+                  value={slot.date}
+                  className="w-[170px]"
+                  onChange={(e) => update({ slots: draft.slots.map((s, j) => (j === i ? { ...s, date: e.target.value } : s)) })}
+                />
+              </Field>
+              <Field id={`time-${i}`} label="Hora">
+                <Input
+                  id={`time-${i}`}
+                  type="time"
+                  step={900}
+                  value={slot.time}
+                  className="w-[120px]"
+                  onChange={(e) => update({ slots: draft.slots.map((s, j) => (j === i ? { ...s, time: e.target.value } : s)) })}
+                />
+              </Field>
+              <div className="flex flex-col gap-[5px]">
+                <span className="text-xs text-foreground/70">Duración</span>
+                <Segmented
+                  name={`duration-${i}`}
+                  label="Duración"
+                  size="sm"
+                  value={String(slot.durationMinutes)}
+                  options={DURATIONS.map((d) => ({ value: String(d), label: d === 60 ? "1 h" : d === 90 ? "1 h 30" : "2 h" }))}
+                  onChange={(v) =>
+                    update({ slots: draft.slots.map((s, j) => (j === i ? { ...s, durationMinutes: Number(v) as SlotInput["durationMinutes"] } : s)) })
+                  }
+                />
+              </div>
+              {draft.slots.length > 1 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="ml-auto"
+                  aria-label="Quitar este horario"
+                  onClick={() => update({ slots: draft.slots.filter((_, j) => j !== i) })}
+                >
+                  <X />
+                </Button>
+              )}
+            </div>
+          ))}
+          {draft.slots.length < MAX_SLOTS && (
+            <Button
+              type="button"
+              variant="ghost"
+              className="self-start"
+              onClick={() => {
+                const last = draft.slots[draft.slots.length - 1];
+                update({ slots: [...draft.slots, { ...last, date: "" }] });
+              }}
+            >
+              <Plus /> Agregar otro horario
+            </Button>
+          )}
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="flex flex-col gap-4">
+          <Field id="title" label="Título">
+            <Input id="title" value={draft.title} maxLength={80} required onChange={(e) => update({ title: e.target.value })} />
+          </Field>
+          <Field id="description" label="Algo más (opcional)">
+            <textarea
+              id="description"
+              value={draft.description}
+              maxLength={1000}
+              rows={3}
+              placeholder="Vení con pechera clara. La cancha se paga en el momento."
+              onChange={(e) => update({ description: e.target.value })}
+              className="w-full rounded-md border border-divider bg-surface px-3.5 py-2.5 text-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            />
+          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field id="capacity" label="Cupo (jugadores)">
+              <Input id="capacity" type="number" min={2} max={30} value={draft.capacity} onChange={(e) => update({ capacity: e.target.value })} />
+            </Field>
+            <Field id="price" label="Precio por persona (opcional)" hint="Dejalo vacío si todavía no sabés.">
+              <Input id="price" type="number" min={0} step={100} placeholder="$" value={draft.price} onChange={(e) => update({ price: e.target.value })} />
+            </Field>
+          </div>
+          <div className="flex flex-col gap-2">
+            <span className="text-xs text-foreground/70">Nivel</span>
+            <Segmented name="level" label="Nivel" value={draft.level} options={LEVEL_OPTIONS} onChange={(level) => update({ level })} />
+          </div>
+          <div className="flex flex-col gap-2">
+            <span className="text-xs text-foreground/70">¿Quién lo ve?</span>
+            <Segmented
+              name="visibility"
+              label="Visibilidad"
+              value={draft.visibility}
+              options={[
+                { value: "public", label: "Público" },
+                { value: "private", label: "Privado" },
+              ]}
+              onChange={(visibility) => update({ visibility })}
+            />
+            <span className="text-xs text-neutral-700">
+              {draft.visibility === "public"
+                ? "Aparece al explorar partidos y cualquiera se puede sumar."
+                : "Solo entra quien tenga el link de invitación."}
+            </span>
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center gap-3">
+        {step > 0 && (
+          <Button type="button" variant="ghost" disabled={pending} onClick={() => (setError(null), setStep(step - 1))}>
+            Atrás
+          </Button>
+        )}
+        <Button type="submit" className="ml-auto" disabled={pending} aria-busy={pending}>
+          {step < STEPS.length - 1 ? "Seguir" : pending ? "Publicando…" : "Publicar partido"}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function VenueStep({
+  sportId,
+  selected,
+  onSelect,
+}: {
+  sportId: number | null;
+  selected: VenueSummary | null;
+  onSelect: (venue: VenueSummary) => void;
+}) {
+  const [q, setQ] = useState("");
+  const [results, setResults] = useState<VenueSummary[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      const found = await searchVenuesForMatchAction({ q, sportId: sportId ?? undefined });
+      if (!cancelled) setResults(found);
+    }, 250);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [q, sportId]);
+
+  const list = results ?? [];
+  const withSelected = selected && !list.some((v) => v.id === selected.id) ? [selected, ...list] : list;
+
+  return (
+    <div className="flex flex-col gap-3">
+      <Input value={q} placeholder="Nombre de la sede o dirección" aria-label="Buscar sede" onChange={(e) => setQ(e.target.value)} />
+      {results === null ? (
+        <div className="h-24 animate-pulse rounded-md bg-neutral-200" />
+      ) : withSelected.length === 0 ? (
+        <p className="m-0 text-sm text-neutral-800">No encontramos sedes con ese nombre para este deporte.</p>
+      ) : (
+        <ul className="m-0 flex max-h-[360px] list-none flex-col gap-2.5 overflow-y-auto p-0" role="radiogroup" aria-label="Sedes">
+          {withSelected.map((venue) => (
+            <li key={venue.id}>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={venue.id === selected?.id}
+                onClick={() => onSelect(venue)}
+                className="block w-full rounded-md text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              >
+                <VenueCard venue={venue} active={venue.id === selected?.id} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <span className="text-[13px] text-neutral-700">
+        ¿No está? <Link href="/sedes/nueva">Proponé la sede</Link> y volvé a armar el partido.
+      </span>
+    </div>
+  );
+}

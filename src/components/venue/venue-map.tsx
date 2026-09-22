@@ -63,8 +63,14 @@ export function VenueMap({
     };
   }, [zoom]);
 
+  // Las páginas que se actualizan solas mandan pines iguales en un array nuevo: no redibujar ni recentrar.
+  const drawn = useRef<string | null>(null);
+
   useEffect(() => {
     if (!ready || !map.current) return;
+    const key = JSON.stringify([pins, activeId]);
+    if (drawn.current === key) return;
+    drawn.current = key;
     const { AdvancedMarkerElement } = google.maps.marker;
     for (const m of markers.current) m.map = null;
     markers.current = pins.map((pin) => {

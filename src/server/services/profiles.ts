@@ -6,7 +6,7 @@ import type { OnboardingInput, ProfileInput, SkillLevel } from "@/lib/validation
 const { profiles, sports, userSports } = schema;
 
 export type Profile = typeof profiles.$inferSelect;
-export type Sport = Pick<typeof sports.$inferSelect, "id" | "slug" | "name">;
+export type Sport = Pick<typeof sports.$inferSelect, "id" | "slug" | "name" | "defaultCapacity">;
 export type UserSport = { sportId: number; level: SkillLevel };
 
 type AuthUser = { id: string; name: string | null; image?: string | null };
@@ -25,7 +25,7 @@ export async function ensureProfile(user: AuthUser): Promise<Profile> {
 
 export async function listActiveSports(): Promise<Sport[]> {
   return db
-    .select({ id: sports.id, slug: sports.slug, name: sports.name })
+    .select({ id: sports.id, slug: sports.slug, name: sports.name, defaultCapacity: sports.defaultCapacity })
     .from(sports)
     .where(eq(sports.isActive, true))
     .orderBy(asc(sports.sortOrder), asc(sports.name));
