@@ -103,13 +103,17 @@ export default async function MatchPage({ params, searchParams }: PageProps<"/pa
 
   return (
     <MatchInteractive
-      matchId={match.id}
-      status={match.status}
-      capacity={match.capacity}
-      timezone={match.venue.timezone}
-      slots={match.slots}
-      participants={match.participants}
-      viewer={match.viewer}
+      match={{
+        id: match.id,
+        status: match.status,
+        capacity: match.capacity,
+        confirmedSlotId: match.confirmedSlotId,
+        participants: match.participants,
+        viewer: match.viewer,
+        slots: match.slots,
+        timezone: match.venue.timezone,
+      }}
+      played={match.played}
       me={actor ? { displayName: actor.profile.displayName, avatarUrl: actor.profile.avatarUrl } : null}
       invite={invite}
       loginHref={withNext("/login", path)}

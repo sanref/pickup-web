@@ -5,11 +5,18 @@ import { Button } from "@/components/ui/button";
 import { formatSlotDay, formatTime } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { requireOnboardedActor } from "@/server/auth/session";
-import { listMyOpenMatches, type MyMatch } from "@/server/services/matches";
+import { listMyMatches, type MyMatch } from "@/server/services/matches";
 
 export const metadata: Metadata = { title: "Mis partidos" };
 
+type Tab = "proximos" | "votacion" | "historial";
+type Tone = "confirmed" | "waitlist" | "other-slot" | "pending" | "organizer" | "voted" | "past";
+
+const money = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
+
 function dateBlock(m: MyMatch): { top: string; main: string } {
+  const at = m.confirmedStartsAt;
+  if (at) return { top: formatSlotDay(at, m.timezone), main: formatTime(at, m.timezone) };
   const [first] = m.slots;
   if (!first) return { top: "Sin horarios", main: "—" };
   if (m.slots.length === 1) return { top: formatSlotDay(first.startsAt, m.timezone), main: formatTime(first.startsAt, m.timezone) };
@@ -18,22 +25,52 @@ function dateBlock(m: MyMatch): { top: string; main: string } {
   return { top: `${m.slots.length} opciones`, main };
 }
 
-function summary(m: MyMatch): string {
+function summary(m: MyMatch, tone: Tone): string {
+  const price = m.pricePerPerson ? ` · ${money.format(m.pricePerPerson)} p/p` : "";
+  if (tone === "confirmed" || tone === "past") return `${m.venueName} · ${m.confirmed} de ${m.capacity}${price}`;
+  if (tone === "waitlist") return `${m.venueName} · ${m.confirmed} de ${m.capacity} · te avisamos si se baja alguien`;
+  if (tone === "other-slot")
+    return `${m.venueName} · ${m.confirmed < m.capacity ? `quedan ${m.capacity - m.confirmed} lugares` : "cupo completo, podés anotarte en espera"}`;
   const best = m.slots.reduce((a, s) => (s.votes > a ? s.votes : a), 0);
   const reached = m.slots.find((s) => s.votes >= m.capacity);
   const people = `${m.participants} de ${m.capacity} anotados`;
-  if (reached) return `${people} · la opción del ${formatSlotDay(reached.startsAt, m.timezone)} llegó al cupo`;
-  if (m.isOrganizer) return best ? `${people} · la más votada tiene ${best}` : `${people} · ninguna opción tiene votos todavía`;
-  return `${people} · organiza ${m.organizerName}`;
+  if (reached) return `${m.venueName} · ${people} · la opción del ${formatSlotDay(reached.startsAt, m.timezone)} llegó al cupo`;
+  if (tone === "organizer") return `${m.venueName} · ${people} · ${best ? `la más votada tiene ${best}` : "ninguna opción tiene votos todavía"}`;
+  return `${m.venueName} · ${people} · organiza ${m.organizerName}`;
 }
 
-function MatchRow({ m, tone }: { m: MyMatch; tone: "pending" | "organizer" | "voted" }) {
+function tag(m: MyMatch, tone: Tone) {
+  switch (tone) {
+    case "confirmed":
+      return <Badge variant="accent-2">{m.isOrganizer ? "Confirmado · organizás vos" : "Confirmado"}</Badge>;
+    case "waitlist":
+      return <Badge variant="neutral">Sos suplente · {m.waitlistPosition ?? "?"}º en espera</Badge>;
+    case "other-slot":
+      return <Badge variant="accent">Se confirmó otro horario</Badge>;
+    case "pending":
+      return <Badge variant="accent">Te falta votar</Badge>;
+    case "organizer":
+      return <Badge variant="outline">Organizás vos</Badge>;
+    case "voted":
+      return <Badge variant="accent-2">{m.myVotes === 1 ? "Votaste 1 horario" : `Votaste ${m.myVotes} horarios`}</Badge>;
+    case "past":
+      return <Badge variant={m.status === "cancelled" ? "outline" : "neutral"}>{m.status === "cancelled" ? "Cancelado" : "Jugado"}</Badge>;
+  }
+}
+
+function MatchRow({ m, tone }: { m: MyMatch; tone: Tone }) {
   const { top, main } = dateBlock(m);
+  const accent = tone === "pending" || tone === "other-slot";
+  const primaryLabel =
+    tone === "pending" ? "Votar horarios" : tone === "other-slot" ? "Sumarme" : tone === "organizer" ? "Gestionar" : "Ver partido";
+  const href = tone === "organizer" ? `/partidos/${m.id}/gestionar` : `/partidos/${m.id}`;
   return (
     <li
       className={cn(
         "flex flex-col gap-4 rounded-md bg-surface p-5 sm:flex-row sm:items-center",
-        tone === "pending" && "border-l-[6px] border-accent shadow-sm",
+        tone === "confirmed" && "border-l-[6px] border-accent-2 shadow-sm",
+        accent && "border-l-[6px] border-accent shadow-sm",
+        tone === "past" && "opacity-80",
       )}
     >
       <div className="flex w-24 shrink-0 flex-col">
@@ -45,22 +82,25 @@ function MatchRow({ m, tone }: { m: MyMatch; tone: "pending" | "organizer" | "vo
           <Link href={`/partidos/${m.id}`} className="font-heading text-xl text-foreground no-underline">
             {m.title}
           </Link>
-          {tone === "pending" && <Badge variant="accent">Te falta votar</Badge>}
-          {tone === "organizer" && <Badge variant="outline">Organizás vos</Badge>}
-          {tone === "voted" && <Badge variant="accent-2">{m.myVotes === 1 ? "Votaste 1 horario" : `Votaste ${m.myVotes} horarios`}</Badge>}
+          {tag(m, tone)}
         </div>
-        <span className="text-[13px] text-neutral-700">
-          {m.venueName} · {summary(m)}
-        </span>
+        <span className="text-[13px] text-neutral-700">{summary(m, tone)}</span>
       </div>
-      <Button asChild variant={tone === "pending" ? "default" : "secondary"} className="shrink-0">
-        <Link href={`/partidos/${m.id}`}>{tone === "pending" ? "Votar horarios" : "Ver partido"}</Link>
-      </Button>
+      <div className="flex shrink-0 gap-2">
+        {tone === "organizer" && (
+          <Button asChild variant="ghost">
+            <Link href={`/partidos/${m.id}`}>Ver</Link>
+          </Button>
+        )}
+        <Button asChild variant={accent ? "default" : "secondary"}>
+          <Link href={href}>{primaryLabel}</Link>
+        </Button>
+      </div>
     </li>
   );
 }
 
-function Group({ label, items, tone }: { label: string; items: MyMatch[]; tone: "pending" | "organizer" | "voted" }) {
+function Group({ label, items, tone }: { label: string; items: MyMatch[]; tone: Tone }) {
   if (items.length === 0) return null;
   return (
     <section className="flex flex-col gap-3">
@@ -74,42 +114,101 @@ function Group({ label, items, tone }: { label: string; items: MyMatch[]; tone: 
   );
 }
 
-export default async function MyMatchesPage() {
+function Empty({ title, text }: { title: string; text: string }) {
+  return (
+    <div className="flex flex-col items-start gap-3 rounded-lg bg-surface p-8">
+      <span className="font-heading text-2xl">{title}</span>
+      <span className="text-sm text-neutral-800">{text}</span>
+      <div className="flex flex-wrap gap-2.5">
+        <Button asChild>
+          <Link href="/partidos/nuevo">Crear partido</Link>
+        </Button>
+        <Button asChild variant="secondary">
+          <Link href="/sedes">Ver sedes</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export default async function MyMatchesPage({ searchParams }: PageProps<"/mis-partidos">) {
   const actor = await requireOnboardedActor("/mis-partidos");
-  const open = await listMyOpenMatches(actor);
-  const pending = open.filter((m) => !m.isOrganizer && m.myVotes === 0);
-  const organizing = open.filter((m) => m.isOrganizer);
-  const voted = open.filter((m) => !m.isOrganizer && m.myVotes > 0);
+  const all = await listMyMatches(actor);
+  const byDate = (a: MyMatch, b: MyMatch) =>
+    (a.confirmedStartsAt ?? a.slots[0]?.startsAt ?? new Date(0)).getTime() - (b.confirmedStartsAt ?? b.slots[0]?.startsAt ?? new Date(0)).getTime();
+
+  const isPast = (m: MyMatch) => m.isPast;
+  const upcoming = all.filter((m) => m.status === "confirmed" && !isPast(m)).sort(byDate);
+  const voting = all.filter((m) => m.status === "open").sort(byDate);
+  const history = all.filter(isPast).sort((a, b) => byDate(b, a));
+
+  const requested = (await searchParams).tab;
+  const tab: Tab =
+    requested === "proximos" || requested === "votacion" || requested === "historial"
+      ? requested
+      : upcoming.length
+        ? "proximos"
+        : "votacion";
+
+  const tabs: { id: Tab; label: string }[] = [
+    { id: "proximos", label: `Próximos · ${upcoming.length}` },
+    { id: "votacion", label: `En votación · ${voting.length}` },
+    { id: "historial", label: "Historial" },
+  ];
 
   return (
     <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-6 px-4 pt-7 pb-11 min-[900px]:px-10">
       <div className="flex flex-wrap items-center gap-4">
         <h1 className="m-0 font-heading text-[36px] leading-tight">Mis partidos</h1>
-        <Badge variant="accent-2" className="ml-auto">
-          En votación · {open.length}
-        </Badge>
+        <nav aria-label="Filtrar partidos" className="inline-flex overflow-hidden rounded-full border border-divider sm:ml-auto">
+          {tabs.map((t) => (
+            <Link
+              key={t.id}
+              href={`/mis-partidos?tab=${t.id}`}
+              aria-current={t.id === tab ? "page" : undefined}
+              className={cn(
+                "inline-flex min-h-11 items-center px-3.5 text-[13px] text-foreground no-underline transition-colors duration-150 sm:min-h-0 sm:py-[7px] [&+&]:border-l [&+&]:border-divider",
+                t.id === tab ? "bg-accent text-background" : "hover:bg-foreground/7",
+              )}
+            >
+              {t.label}
+            </Link>
+          ))}
+        </nav>
       </div>
 
-      {open.length === 0 ? (
-        <div className="flex flex-col items-start gap-3 rounded-lg bg-surface p-8">
-          <span className="font-heading text-2xl">Todavía no estás en ningún partido</span>
-          <span className="text-sm text-neutral-800">Armá uno con tu gente o buscá una sede y proponé horarios.</span>
-          <div className="flex flex-wrap gap-2.5">
-            <Button asChild>
-              <Link href="/partidos/nuevo">Crear partido</Link>
-            </Button>
-            <Button asChild variant="secondary">
-              <Link href="/sedes">Ver sedes</Link>
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <>
-          <Group label="Esperando tu voto" items={pending} tone="pending" />
-          <Group label="Organizás vos" items={organizing} tone="organizer" />
-          <Group label="Ya votaste" items={voted} tone="voted" />
-        </>
-      )}
+      {tab === "proximos" &&
+        (upcoming.length ? (
+          <>
+            <Group label="Confirmados" items={upcoming.filter((m) => m.myStatus === "confirmed" || m.isOrganizer)} tone="confirmed" />
+            <Group label="En lista de espera" items={upcoming.filter((m) => m.myStatus === "waitlist")} tone="waitlist" />
+            <Group
+              label="Se confirmó otro horario"
+              items={upcoming.filter((m) => m.myStatus === "interested" && !m.isOrganizer)}
+              tone="other-slot"
+            />
+          </>
+        ) : (
+          <Empty title="No tenés partidos confirmados" text="Cuando el organizador confirme un horario, lo vas a ver acá." />
+        ))}
+
+      {tab === "votacion" &&
+        (voting.length ? (
+          <>
+            <Group label="Esperando tu voto" items={voting.filter((m) => !m.isOrganizer && m.myVotes === 0)} tone="pending" />
+            <Group label="Organizás vos" items={voting.filter((m) => m.isOrganizer)} tone="organizer" />
+            <Group label="Ya votaste" items={voting.filter((m) => !m.isOrganizer && m.myVotes > 0)} tone="voted" />
+          </>
+        ) : (
+          <Empty title="No hay partidos en votación" text="Armá uno con tu gente o buscá una sede y proponé horarios." />
+        ))}
+
+      {tab === "historial" &&
+        (history.length ? (
+          <Group label="Jugados y cancelados" items={history} tone="past" />
+        ) : (
+          <Empty title="Todavía no jugaste partidos" text="Los partidos que se jueguen o se cancelen van a quedar acá." />
+        ))}
     </div>
   );
 }
