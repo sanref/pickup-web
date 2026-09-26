@@ -3,22 +3,25 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
 import { Slot } from "radix-ui"
 
-// Botones Organic: siempre en píldora, texto en Caprasimo 14px, alto 44px.
-// primary = terracota (una acción principal por pantalla), secondary = contorno, ghost = texto terracota.
+// Botones v2: píldora de 44px, texto de 14px en Familjen Grotesk (Graduate no se usa acá).
+// primary = coral con texto navy (una acción por pantalla), navy = acción de navegación,
+// outline = contorno sobre fondo claro, outline-light = contorno sobre la barra navy.
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full border border-transparent font-heading text-sm leading-[1.2] whitespace-nowrap transition-colors duration-150 ease-out select-none disabled:cursor-not-allowed disabled:opacity-45 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full border border-transparent text-sm font-semibold leading-[1.2] whitespace-nowrap transition-colors duration-150 ease-out select-none disabled:cursor-not-allowed disabled:opacity-45 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default:
-          "bg-accent text-background hover:bg-accent-600 active:bg-accent-700",
-        secondary:
-          "border-divider bg-transparent text-foreground hover:bg-[color-mix(in_srgb,var(--foreground)_7%,transparent)] active:bg-[color-mix(in_srgb,var(--foreground)_14%,transparent)]",
+        primary: "bg-coral text-navy hover:bg-coral-hover",
+        navy: "bg-navy text-surface hover:bg-navy-600",
+        outline:
+          "border-border-input bg-transparent text-navy hover:border-navy",
+        "outline-light":
+          "border-navy-300 bg-transparent text-surface hover:border-surface",
         ghost:
-          "px-(--space-2) text-accent hover:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] active:bg-[color-mix(in_srgb,var(--accent)_18%,transparent)]",
+          "px-3 text-navy hover:bg-[color-mix(in_srgb,var(--color-navy)_8%,transparent)] active:bg-[color-mix(in_srgb,var(--color-navy)_14%,transparent)]",
         destructive:
-          "px-(--space-2) font-sans text-[13px] text-accent-700 hover:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]",
-        link: "px-0 text-accent underline-offset-4 hover:underline",
+          "px-2 text-[13px] text-coral-700 hover:bg-[color-mix(in_srgb,var(--color-coral)_10%,transparent)]",
+        link: "px-0 text-coral-700 underline-offset-4 hover:underline",
       },
       size: {
         default: "h-11 px-5",
@@ -28,11 +31,8 @@ const buttonVariants = cva(
         "icon-sm": "size-9",
       },
     },
-    compoundVariants: [
-      { variant: "ghost", size: "default", className: "px-(--space-3)" },
-    ],
     defaultVariants: {
-      variant: "default",
+      variant: "primary",
       size: "default",
     },
   }
@@ -40,7 +40,7 @@ const buttonVariants = cva(
 
 function Button({
   className,
-  variant = "default",
+  variant = "primary",
   size = "default",
   asChild = false,
   ...props

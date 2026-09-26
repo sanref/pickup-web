@@ -3,7 +3,7 @@
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
 
-// Avisos del handoff: éxito en salvia (accent-2-100), atención en terracota (accent-100).
+// Avisos del handoff v2: toast en píldora, navy para éxito y coral-100 para info.
 // La app es solo tema claro.
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
@@ -19,19 +19,19 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       style={
         {
-          "--normal-bg": "var(--color-neutral-100)",
-          "--normal-text": "var(--foreground)",
+          "--normal-bg": "var(--color-coral-100)",
+          "--normal-text": "var(--color-navy)",
           "--normal-border": "transparent",
-          "--success-bg": "var(--color-accent-2-100)",
-          "--success-text": "var(--color-accent-2-900)",
+          "--success-bg": "var(--color-navy)",
+          "--success-text": "var(--color-surface)",
           "--success-border": "transparent",
-          "--error-bg": "var(--color-accent-100)",
-          "--error-text": "var(--color-accent-900)",
+          "--error-bg": "var(--color-coral-100)",
+          "--error-text": "var(--color-coral-700)",
           "--error-border": "transparent",
-          "--warning-bg": "var(--color-accent-100)",
-          "--warning-text": "var(--color-accent-900)",
+          "--warning-bg": "var(--color-coral-100)",
+          "--warning-text": "var(--color-coral-700)",
           "--warning-border": "transparent",
-          "--border-radius": "18px",
+          "--border-radius": "999px",
         } as React.CSSProperties
       }
       toastOptions={{

@@ -140,12 +140,12 @@ export function NewMatchWizard({
     >
       <div className="flex gap-1.5" role="progressbar" aria-label={`Paso ${step + 1} de ${STEPS.length}`} aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1}>
         {STEPS.map((s, i) => (
-          <div key={s.title} className={cn("h-1.5 flex-1 rounded-full transition-colors duration-150", i <= step ? "bg-accent" : "bg-neutral-300")} />
+          <div key={s.title} className={cn("h-1.5 flex-1 rounded-full transition-colors duration-150", i <= step ? "bg-coral" : "bg-neutral-300")} />
         ))}
       </div>
       <div className="flex flex-col gap-1.5">
-        <h1 className="m-0 font-heading text-[30px] leading-tight">{current.title}</h1>
-        <p className="m-0 text-sm text-neutral-800">{current.description}</p>
+        <h1 className="m-0 text-[29px] leading-tight font-bold tracking-[-0.03em]">{current.title}</h1>
+        <p className="m-0 text-sm text-text-2">{current.description}</p>
       </div>
 
       <FormMessage kind="error">{error}</FormMessage>
@@ -163,7 +163,7 @@ export function NewMatchWizard({
                 onClick={() => chooseSport(s)}
                 className={cn(
                   "min-h-11 rounded-full px-4 text-sm transition-colors duration-150",
-                  on ? "bg-accent text-background" : "bg-neutral-100 text-neutral-800 hover:bg-neutral-200",
+                  on ? "bg-coral text-navy" : "bg-surface text-text-2 hover:bg-neutral-200",
                 )}
               >
                 {s.name}
@@ -178,7 +178,7 @@ export function NewMatchWizard({
       {step === 2 && (
         <div className="flex flex-col gap-3">
           {draft.slots.map((slot, i) => (
-            <div key={i} className="flex flex-wrap items-end gap-3 rounded-md bg-neutral-100 p-3.5">
+            <div key={i} className="flex flex-wrap items-end gap-3 rounded-md bg-surface p-3.5">
               <Field id={`date-${i}`} label="Fecha">
                 <Input
                   id={`date-${i}`}
@@ -200,7 +200,7 @@ export function NewMatchWizard({
                 />
               </Field>
               <div className="flex flex-col gap-[5px]">
-                <span className="text-xs text-foreground/70">Duración</span>
+                <span className="text-xs text-text/70">Duración</span>
                 <Segmented
                   name={`duration-${i}`}
                   label="Duración"
@@ -255,7 +255,7 @@ export function NewMatchWizard({
               rows={3}
               placeholder="Vení con pechera clara. La cancha se paga en el momento."
               onChange={(e) => update({ description: e.target.value })}
-              className="w-full rounded-md border border-divider bg-surface px-3.5 py-2.5 text-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              className="w-full rounded-md border border-border bg-surface px-3.5 py-2.5 text-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral"
             />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -267,11 +267,11 @@ export function NewMatchWizard({
             </Field>
           </div>
           <div className="flex flex-col gap-2">
-            <span className="text-xs text-foreground/70">Nivel</span>
+            <span className="text-xs text-text/70">Nivel</span>
             <Segmented name="level" label="Nivel" value={draft.level} options={LEVEL_OPTIONS} onChange={(level) => update({ level })} />
           </div>
           <div className="flex flex-col gap-2">
-            <span className="text-xs text-foreground/70">¿Quién lo ve?</span>
+            <span className="text-xs text-text/70">¿Quién lo ve?</span>
             <Segmented
               name="visibility"
               label="Visibilidad"
@@ -282,7 +282,7 @@ export function NewMatchWizard({
               ]}
               onChange={(visibility) => update({ visibility })}
             />
-            <span className="text-xs text-neutral-700">
+            <span className="text-xs text-text-3">
               {draft.visibility === "public"
                 ? "Aparece al explorar partidos y cualquiera se puede sumar."
                 : "Solo entra quien tenga el link de invitación."}
@@ -338,7 +338,7 @@ function VenueStep({
       {results === null ? (
         <div className="h-24 animate-pulse rounded-md bg-neutral-200" />
       ) : withSelected.length === 0 ? (
-        <p className="m-0 text-sm text-neutral-800">No encontramos sedes con ese nombre para este deporte.</p>
+        <p className="m-0 text-sm text-text-2">No encontramos sedes con ese nombre para este deporte.</p>
       ) : (
         <ul className="m-0 flex max-h-[360px] list-none flex-col gap-2.5 overflow-y-auto p-0" role="radiogroup" aria-label="Sedes">
           {withSelected.map((venue) => (
@@ -348,7 +348,7 @@ function VenueStep({
                 role="radio"
                 aria-checked={venue.id === selected?.id}
                 onClick={() => onSelect(venue)}
-                className="block w-full rounded-md text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                className="block w-full rounded-md text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral"
               >
                 <VenueCard venue={venue} active={venue.id === selected?.id} />
               </button>
@@ -356,7 +356,7 @@ function VenueStep({
           ))}
         </ul>
       )}
-      <span className="text-[13px] text-neutral-700">
+      <span className="text-[13px] text-text-3">
         ¿No está? <Link href="/sedes/nueva">Proponé la sede</Link> y volvé a armar el partido.
       </span>
     </div>

@@ -24,7 +24,7 @@ export default async function ResetPasswordPage({ searchParams }: PageProps<"/nu
       }
     >
       <ResetPasswordForm next={next} email={email} />
-      <span className="text-center text-[13px] text-neutral-700">
+      <span className="text-center text-[13px] text-text-3">
         <Link href={withNext("/recuperar", next)}>Usar otro email</Link>
       </span>
     </AuthCard>

@@ -7,18 +7,22 @@ import { GOOGLE_MAP_ID, loadGoogleMaps } from "@/lib/google-maps";
 
 export type MapPin = { id: string; lat: number; lng: number; label: string };
 
-// Pin del handoff: píldora con el texto y un punto debajo. Activo = terracota; inactivo = surface con punto salvia.
+// Pin del handoff v2: píldora con el texto y un punto debajo.
+// Activo = píldora coral con punto de 12px; inactivo = píldora surface con punto navy de 9px.
 export function pinElement(label: string, active: boolean): HTMLElement {
   const root = document.createElement("div");
   root.className = "flex flex-col items-center gap-1";
   const pill = document.createElement("div");
   pill.className = cn(
     "rounded-full px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-colors duration-150",
-    active ? "bg-accent text-background shadow-md" : "bg-surface text-foreground shadow-sm",
+    active ? "bg-coral text-navy shadow-md" : "bg-surface text-text shadow-sm",
   );
   pill.textContent = label;
   const dot = document.createElement("div");
-  dot.className = cn("size-3 rounded-full border-[3px] border-background", active ? "bg-accent" : "bg-accent-2");
+  dot.className = cn(
+    "rounded-full border-[3px] border-background",
+    active ? "size-3 bg-coral" : "size-[9px] bg-navy",
+  );
   root.append(pill, dot);
   return root;
 }
@@ -97,10 +101,10 @@ export function VenueMap({
   }, [ready, pins, activeId, onPinClick]);
 
   return (
-    <div className={cn("relative overflow-hidden rounded-lg bg-neutral-200", className)}>
+    <div className={cn("relative overflow-hidden rounded-lg bg-map", className)}>
       <div ref={container} className="absolute inset-0" />
       {failed && (
-        <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-neutral-700">
+        <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-text-3">
           No pudimos cargar el mapa.
         </div>
       )}

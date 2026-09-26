@@ -26,7 +26,7 @@ export function ProfileForm({ sports, initial }: { sports: SportOption[]; initia
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-10">
       <section className="flex flex-col gap-4">
-        <h2 className="m-0 font-heading text-[22px]">Datos</h2>
+        <h2 className="m-0 text-[21px] tracking-[-0.02em]">Datos</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field id="displayName" label="Nombre visible">
             <Input
@@ -53,7 +53,7 @@ export function ProfileForm({ sports, initial }: { sports: SportOption[]; initia
       </section>
 
       <section className="flex flex-col gap-4">
-        <h2 className="m-0 font-heading text-[22px]">Deportes y nivel</h2>
+        <h2 className="m-0 text-[21px] tracking-[-0.02em]">Deportes y nivel</h2>
         <SportPicker sports={sports} value={values.sports} onChange={(s) => setValues({ ...values, sports: s })} compactLevels />
       </section>
 

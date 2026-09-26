@@ -7,7 +7,8 @@ export function initials(name: string): string {
   return letters.toUpperCase();
 }
 
-// Sin foto: iniciales sobre accent-2-300 (handoff).
+// Sin foto: iniciales sobre navy-600 (handoff v2). Las variantes neutral-200 y coral-100
+// se piden con `textClassName` donde el fondo lo necesite.
 export function UserAvatar({
   name,
   src,
@@ -22,7 +23,7 @@ export function UserAvatar({
   return (
     <Avatar className={cn("size-9", className)}>
       {src && <AvatarImage src={src} alt="" referrerPolicy="no-referrer" />}
-      <AvatarFallback className={cn("bg-accent-2-300 font-semibold text-accent-2-900", textClassName)}>{initials(name)}</AvatarFallback>
+      <AvatarFallback className={cn("bg-navy-600 font-semibold text-surface", textClassName)}>{initials(name)}</AvatarFallback>
     </Avatar>
   );
 }

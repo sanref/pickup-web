@@ -11,7 +11,7 @@ export default async function ForgotPasswordPage({ searchParams }: PageProps<"/r
   return (
     <AuthCard title="Recuperar contraseña" description="Te mandamos un código al email para que elijas una contraseña nueva.">
       <ForgotPasswordForm next={next} />
-      <span className="text-center text-[13px] text-neutral-700">
+      <span className="text-center text-[13px] text-text-3">
         <Link href={withNext("/login", next)}>Volver a iniciar sesión</Link>
       </span>
     </AuthCard>

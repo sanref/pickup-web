@@ -87,8 +87,8 @@ export function PlaceSearch({ onPick, center = DEFAULT_CENTER }: { onPick: (plac
         }}
         onKeyDown={onKeyDown}
       />
-      {(status === "error" || failed) && <span className="text-xs text-accent-700">No pudimos buscar en Google Maps. Probá de nuevo.</span>}
-      {status === "loading" && <span className="text-xs text-neutral-700">Trayendo los datos del lugar…</span>}
+      {(status === "error" || failed) && <span className="text-xs text-coral-700">No pudimos buscar en Google Maps. Probá de nuevo.</span>}
+      {status === "loading" && <span className="text-xs text-text-3">Trayendo los datos del lugar…</span>}
       {open && (
         <ul
           id={listId}
@@ -106,13 +106,13 @@ export function PlaceSearch({ onPick, center = DEFAULT_CENTER }: { onPick: (plac
                 e.preventDefault();
                 pick(s);
               }}
-              className={cn("flex cursor-pointer flex-col rounded-sm px-3 py-2", i === highlight && "bg-neutral-100")}
+              className={cn("flex cursor-pointer flex-col rounded-sm px-3 py-2", i === highlight && "bg-surface-alt")}
             >
               <span className="text-sm font-semibold">{s.main}</span>
-              <span className="text-xs text-neutral-700">{s.secondary}</span>
+              <span className="text-xs text-text-3">{s.secondary}</span>
             </li>
           ))}
-          <li aria-hidden className="px-3 pt-1 text-right text-[10px] text-neutral-600">
+          <li aria-hidden className="px-3 pt-1 text-right text-[10px] text-text-4">
             Resultados de Google
           </li>
         </ul>

@@ -65,7 +65,7 @@ export function NewVenueFlow({ sports }: { sports: SportOption[] }) {
         {step.kind === "search" && (
           <>
             <PlaceSearch onPick={onPick} />
-            {pending && <span className="text-sm text-neutral-700">Revisando si ya la tenemos…</span>}
+            {pending && <span className="text-sm text-text-3">Revisando si ya la tenemos…</span>}
           </>
         )}
 
@@ -78,7 +78,7 @@ export function NewVenueFlow({ sports }: { sports: SportOption[] }) {
             <ul className="m-0 flex list-none flex-col gap-3 p-0">
               {step.similar.map((v) => (
                 <li key={v.id}>
-                  <Link href={`/sedes/${v.id}`} className="block text-foreground no-underline">
+                  <Link href={`/sedes/${v.id}`} className="block text-text no-underline">
                     <VenueCard venue={v} />
                   </Link>
                 </li>
@@ -88,7 +88,7 @@ export function NewVenueFlow({ sports }: { sports: SportOption[] }) {
               <Button type="button" variant="ghost" onClick={() => setStep({ kind: "search" })}>
                 Buscar otra
               </Button>
-              <Button type="button" variant="secondary" className="ml-auto" onClick={() => setStep({ kind: "details", place: step.place })}>
+              <Button type="button" variant="outline" className="ml-auto" onClick={() => setStep({ kind: "details", place: step.place })}>
                 No, es otra sede
               </Button>
             </div>
@@ -110,10 +110,10 @@ export function NewVenueFlow({ sports }: { sports: SportOption[] }) {
               </Field>
             </div>
             <div className="flex flex-col gap-2.5">
-              <span className="text-xs text-foreground/70">¿Qué se juega?</span>
+              <span className="text-xs text-text/70">¿Qué se juega?</span>
               <SportTags sports={sports} selected={sportIds} onToggle={toggleSport} />
             </div>
-            <p className="m-0 text-xs text-neutral-700">
+            <p className="m-0 text-xs text-text-3">
               La revisamos antes de sumarla al catálogo. Mientras tanto ya podés armar partidos acá.
             </p>
             <div className="flex flex-wrap gap-2.5">

@@ -22,7 +22,7 @@ export function VenueBrowser({ venues }: { venues: VenueSummary[] }) {
       <ul className="m-0 flex list-none flex-col gap-3.5 p-0">
         {venues.map((venue) => (
           <li key={venue.id} onMouseEnter={() => setActiveId(venue.id)} onMouseLeave={() => setActiveId(null)}>
-            <Link href={`/sedes/${venue.id}`} className="block text-foreground no-underline">
+            <Link href={`/sedes/${venue.id}`} className="block text-text no-underline">
               <VenueCard venue={venue} active={venue.id === activeId} />
             </Link>
           </li>

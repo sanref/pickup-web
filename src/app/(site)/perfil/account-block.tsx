@@ -34,16 +34,16 @@ export function AccountBlock({
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="m-0 font-heading text-[22px]">Cuenta</h2>
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-neutral-100 px-4 py-3">
+      <h2 className="m-0 text-[21px] tracking-[-0.02em]">Cuenta</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-surface px-4 py-3">
         <div className="flex flex-col gap-0.5">
           <span className="text-sm font-semibold">{email}</span>
-          <span className="text-xs text-neutral-700">{status}</span>
+          <span className="text-xs text-text-3">{status}</span>
         </div>
         {hasPassword && <ChangePasswordDialog />}
       </div>
       <form action={signOut} className="flex">
-        <SubmitButton variant="secondary" className="ml-auto" pendingLabel="Saliendo…">
+        <SubmitButton variant="outline" className="ml-auto" pendingLabel="Saliendo…">
           Cerrar sesión
         </SubmitButton>
       </form>

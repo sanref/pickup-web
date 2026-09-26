@@ -16,8 +16,8 @@ export default async function NewVenuePage() {
         ← Todas las sedes
       </Link>
       <div className="flex flex-col gap-1.5">
-        <h1 className="m-0 font-heading text-[34px] leading-tight">Proponer una sede</h1>
-        <p className="m-0 text-sm text-neutral-800">Buscala en Google Maps. Si ya la tenemos, te la mostramos.</p>
+        <h1 className="m-0 text-[34px] leading-tight font-bold tracking-[-0.03em]">Proponer una sede</h1>
+        <p className="m-0 text-sm text-text-2">Buscala en Google Maps. Si ya la tenemos, te la mostramos.</p>
       </div>
       <NewVenueFlow sports={sports} />
     </div>

@@ -27,14 +27,14 @@ export function UserMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label="Menú de tu cuenta"
-        className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral"
       >
         <UserAvatar name={name} src={avatarUrl} className="size-11 sm:size-10" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 rounded-md bg-background p-1.5 shadow-md">
         <DropdownMenuLabel className="flex flex-col gap-0.5 font-normal">
-          <span className="text-sm font-semibold text-foreground">{name}</span>
-          <span className="truncate text-xs text-neutral-700">{email}</span>
+          <span className="text-sm font-semibold text-text">{name}</span>
+          <span className="truncate text-xs text-text-3">{email}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>

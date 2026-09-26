@@ -3,17 +3,18 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
 import { Slot } from "radix-ui"
 
-// Tags Organic: píldora de 11px. accent = empuja a actuar ("faltan 3"),
-// accent-2 = resuelto (confirmado, en votación), neutral = informativo, outline = cancelado.
+// Tags v2: píldora de 11-12px. coral = empuja a actuar ("faltan 3"),
+// navy = estructura y estados ya resueltos, neutral = informativo, outline = cancelado.
 const badgeVariants = cva(
-  "inline-flex w-fit shrink-0 items-center justify-center gap-1 rounded-full border border-transparent px-2.5 py-[3px] text-[11px] leading-normal tracking-[0.02em] whitespace-nowrap [&>svg]:pointer-events-none [&>svg]:size-3!",
+  "inline-flex w-fit shrink-0 items-center justify-center gap-1 rounded-full border border-transparent px-2.5 py-[3px] text-[11px] leading-normal whitespace-nowrap [&>svg]:pointer-events-none [&>svg]:size-3!",
   {
     variants: {
       variant: {
-        accent: "bg-accent-100 text-accent-800",
-        "accent-2": "bg-accent-2-100 text-accent-2-800",
-        neutral: "bg-neutral-100 text-neutral-800",
-        outline: "border-accent text-accent",
+        coral: "bg-coral font-semibold text-navy",
+        "coral-soft": "bg-coral-100 text-navy",
+        navy: "bg-navy text-navy-200",
+        neutral: "bg-neutral-200 text-text-3",
+        outline: "border-border-input text-text-3",
       },
     },
     defaultVariants: {

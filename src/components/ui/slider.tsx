@@ -35,21 +35,21 @@ function Slider({
       )}
       {...props}
     >
-      {/* Organic: track neutral-300 de 6px, relleno terracota, pulgar de 18px con borde del color del fondo. */}
+      {/* v2: track neutral-200, relleno coral, pulgar navy de 18px con borde del color del fondo. */}
       <SliderPrimitive.Track
         data-slot="slider-track"
-        className="relative grow overflow-hidden rounded-full bg-neutral-300 data-horizontal:h-1.5 data-horizontal:w-full data-vertical:h-full data-vertical:w-1.5"
+        className="relative grow overflow-hidden rounded-full bg-neutral-200 data-horizontal:h-1.5 data-horizontal:w-full data-vertical:h-full data-vertical:w-1.5"
       >
         <SliderPrimitive.Range
           data-slot="slider-range"
-          className="absolute rounded-full bg-accent select-none data-horizontal:h-full data-vertical:w-full"
+          className="absolute rounded-full bg-coral select-none data-horizontal:h-full data-vertical:w-full"
         />
       </SliderPrimitive.Track>
       {Array.from({ length: _values.length }, (_, index) => (
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
           key={index}
-          className="relative block size-[18px] shrink-0 rounded-full border-[3px] border-background bg-accent transition-colors duration-150 ease-out select-none after:absolute after:-inset-3 hover:bg-accent-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:pointer-events-none disabled:opacity-45"
+          className="relative block size-[18px] shrink-0 rounded-full border-[3px] border-background bg-navy transition-colors duration-150 ease-out select-none after:absolute after:-inset-3 hover:bg-navy-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral disabled:pointer-events-none disabled:opacity-45"
         />
       ))}
     </SliderPrimitive.Root>

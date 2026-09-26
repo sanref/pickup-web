@@ -30,10 +30,10 @@ export default async function VenuesPage({ searchParams }: PageProps<"/sedes">) 
     <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-4 py-8 min-[900px]:px-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1.5">
-          <h1 className="m-0 font-heading text-[34px] leading-tight">Sedes</h1>
-          <p className="m-0 text-sm text-neutral-800">Canchas y clubes donde se arman partidos.</p>
+          <h1 className="m-0 text-[34px] leading-tight font-bold tracking-[-0.03em]">Sedes</h1>
+          <p className="m-0 text-sm text-text-2">Canchas y clubes donde se arman partidos.</p>
         </div>
-        <Button asChild variant="secondary">
+        <Button asChild variant="outline">
           <Link href="/sedes/nueva">Proponer una sede</Link>
         </Button>
       </div>
@@ -41,7 +41,7 @@ export default async function VenuesPage({ searchParams }: PageProps<"/sedes">) 
       <form className="flex max-w-xl gap-2.5" role="search">
         {sport && <input type="hidden" name="deporte" value={sport.slug} />}
         <Input name="q" defaultValue={q} placeholder="Buscar por nombre o dirección" aria-label="Buscar sedes" />
-        <Button type="submit" variant="secondary">
+        <Button type="submit" variant="outline">
           Buscar
         </Button>
       </form>
@@ -56,7 +56,7 @@ export default async function VenuesPage({ searchParams }: PageProps<"/sedes">) 
               aria-current={on ? "page" : undefined}
               className={cn(
                 "inline-flex min-h-11 items-center rounded-full px-3.5 text-[13px] no-underline transition-colors duration-150 sm:min-h-9",
-                on ? "bg-accent-100 text-accent-800" : "bg-neutral-100 text-neutral-800 hover:bg-neutral-200",
+                on ? "bg-coral-100 text-navy" : "bg-surface text-text-2 hover:bg-neutral-200",
               )}
             >
               {s.name}
@@ -69,11 +69,11 @@ export default async function VenuesPage({ searchParams }: PageProps<"/sedes">) 
         <VenueBrowser venues={venues} />
       ) : (
         <div className="flex flex-col items-start gap-3 rounded-lg bg-surface p-8">
-          <span className="font-heading text-2xl">No encontramos sedes</span>
-          <span className="text-sm text-neutral-800">Probá con otro nombre o proponé la cancha donde jugás.</span>
+          <span className="text-2xl font-bold tracking-[-0.02em]">No encontramos sedes</span>
+          <span className="text-sm text-text-2">Probá con otro nombre o proponé la cancha donde jugás.</span>
           <div className="flex flex-wrap gap-2.5">
             {(q || sport) && (
-              <Button asChild variant="secondary">
+              <Button asChild variant="outline">
                 <Link href="/sedes">Ver todas</Link>
               </Button>
             )}

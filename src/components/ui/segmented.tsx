@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 
-// Control segmentado del handoff (.seg): grupo pill con divisorias internas, opción elegida en terracota.
+// Control segmentado del handoff: grupo pill con divisorias de 1px, opción elegida en navy.
 // Radios nativos para que el teclado y los lectores de pantalla funcionen sin trabajo extra.
 export function Segmented<T extends string>({
   name,
@@ -29,8 +29,8 @@ export function Segmented<T extends string>({
       aria-label={label}
       aria-orientation={orientation}
       className={cn(
-        "inline-flex overflow-hidden border border-divider",
-        vertical ? "w-full flex-col rounded-lg" : "w-fit rounded-full",
+        "inline-flex overflow-hidden border border-border-input bg-surface",
+        vertical ? "w-full flex-col rounded-sm" : "w-fit rounded-full",
       )}
     >
       {options.map((option) => {
@@ -41,9 +41,9 @@ export function Segmented<T extends string>({
             className={cn(
               "relative inline-flex min-h-11 cursor-pointer items-center px-3 transition-colors duration-150 ease-out sm:min-h-0",
               size === "sm" ? "py-1.5 text-xs" : "py-[7px] text-[13px]",
-              vertical ? "[&+&]:border-t [&+&]:border-divider" : "[&+&]:border-l [&+&]:border-divider",
-              "has-[input:focus-visible]:outline-2 has-[input:focus-visible]:-outline-offset-2 has-[input:focus-visible]:outline-accent",
-              checked ? "bg-accent text-background" : "hover:bg-foreground/7",
+              vertical ? "[&+&]:border-t [&+&]:border-border-input" : "[&+&]:border-l [&+&]:border-border-input",
+              "has-[input:focus-visible]:outline-2 has-[input:focus-visible]:-outline-offset-2 has-[input:focus-visible]:outline-coral",
+              checked ? "bg-navy font-semibold text-surface" : "text-text-2 hover:bg-navy/6",
             )}
           >
             <input

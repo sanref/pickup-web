@@ -49,8 +49,8 @@ export function SportMonogram({ sport, className }: { sport: MatchSearchResult["
     <span
       aria-hidden
       className={cn(
-        "grid size-9 shrink-0 place-items-center rounded-full font-heading text-[13px]",
-        sport.id % 2 ? "bg-accent-200 text-accent-700" : "bg-accent-2-200 text-accent-2-800",
+        "grid size-9 shrink-0 place-items-center rounded-full text-[13px] font-semibold",
+        sport.id % 2 ? "bg-coral-100 text-navy" : "bg-neutral-200 text-text-2",
         className,
       )}
     >
@@ -60,7 +60,8 @@ export function SportMonogram({ sport, className }: { sport: MatchSearchResult["
 }
 
 // Fila de /explorar (MatchCard del handoff): fecha a la izquierda, datos al medio, "faltan N" y acción a la derecha.
-// La tarjeta activa (mouse encima o pin elegido) lleva borde terracota de 2px.
+// La tarjeta activa (mouse encima o pin elegido) lleva borde coral de 2px; el borde transparente
+// está siempre reservado para que el hover no mueva el layout.
 export function MatchCard({ match, active = false }: { match: MatchSearchResult; active?: boolean }) {
   const tz = match.venue.timezone;
   const [first] = match.slots;
@@ -71,37 +72,37 @@ export function MatchCard({ match, active = false }: { match: MatchSearchResult;
     <div
       className={cn(
         "grid grid-cols-[auto_1fr] items-center gap-y-3 rounded-md border-2 bg-surface p-4 transition-colors duration-150 ease-out sm:grid-cols-[auto_1fr_auto] sm:p-[18px]",
-        active ? "border-accent shadow-sm" : "border-transparent",
+        active ? "border-coral shadow-md" : "border-transparent",
       )}
     >
-      <div className="flex w-[74px] flex-col items-center justify-center border-r border-neutral-300 pr-4">
+      <div className="flex w-[74px] flex-col items-center justify-center border-r border-border pr-4">
         {first && (
           <>
-            <span className="text-[11px] tracking-[0.08em] text-neutral-600 uppercase">{formatShortWeekday(first, tz)}</span>
-            <span className="font-heading text-[28px] leading-[1.1]">{formatDayOfMonth(first, tz)}</span>
-            <span className="text-xs text-neutral-700">{formatTime(first, tz)}</span>
+            <span className="text-xs font-semibold text-text-3">{formatShortWeekday(first, tz)}</span>
+            <span className="font-display text-[28px] leading-[1.1] tabular">{formatDayOfMonth(first, tz)}</span>
+            <span className="text-xs tabular text-text-3">{formatTime(first, tz)}</span>
           </>
         )}
       </div>
       <div className="flex min-w-0 flex-col gap-[5px] pl-4">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-heading text-[19px] leading-tight">{match.title}</span>
+          <span className="text-[18px] leading-tight font-semibold tracking-[-0.02em]">{match.title}</span>
           <StatusTag status={match.status} />
         </div>
-        <span className="text-[13px] text-neutral-700">
+        <span className="text-[13px] text-text-3">
           {meta}
           {moreSlots > 0 && ` · ${moreSlots === 1 ? "1 horario más" : `${moreSlots} horarios más`}`}
         </span>
         <div className="mt-0.5 flex items-center gap-2.5">
-          <CapacityBar value={match.filled} capacity={match.capacity} className="h-2 w-[120px]" />
-          <span className="text-xs text-neutral-700">
+          <CapacityBar value={match.filled} capacity={match.capacity} className="w-[120px]" />
+          <span className="text-xs tabular text-text-3">
             {match.filled} de {match.capacity}
           </span>
         </div>
       </div>
       <div className="col-span-2 flex items-center justify-between gap-2 sm:col-span-1 sm:flex-col sm:items-end sm:pl-3">
         <MissingCount missing={match.missing} />
-        <span className={cn(buttonVariants({ variant: active ? "default" : "secondary" }))}>
+        <span className={cn(buttonVariants({ variant: active ? "primary" : "outline" }))}>
           {match.viewerJoined ? "Ver partido" : "Me sumo"}
         </span>
       </div>
@@ -121,8 +122,8 @@ export function MatchTile({ match }: { match: MatchSearchResult }) {
           <MissingCount missing={match.missing} />
         </span>
       </div>
-      <span className="font-heading text-[19px] leading-[1.15]">{match.title}</span>
-      <div className="flex flex-col gap-1 text-[13px] text-neutral-700">
+      <span className="text-[18px] leading-[1.15] font-semibold tracking-[-0.02em]">{match.title}</span>
+      <div className="flex flex-col gap-1 text-[13px] text-text-3">
         <span>{slotSummary(match.slots, match.venue.timezone)}</span>
         <span>
           {match.venue.name} · {formatDistance(match.distanceKm)}
@@ -130,7 +131,7 @@ export function MatchTile({ match }: { match: MatchSearchResult }) {
       </div>
       <div className="mt-auto flex items-center gap-2.5 pt-1">
         <AvatarStack people={match.people} max={2} total={match.participantCount} edgeClassName="border-surface" />
-        {price && <span className="ml-auto text-xs text-neutral-700">{price}</span>}
+        {price && <span className="ml-auto text-xs tabular text-text-3">{price}</span>}
       </div>
     </div>
   );

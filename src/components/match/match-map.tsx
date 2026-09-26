@@ -18,8 +18,8 @@ export type MatchPin = {
   activeLabel: string;
 };
 
-// accent-2 del sistema: el círculo marca el radio de búsqueda sin competir con los pines.
-const RADIUS_COLOR = "#7a8a5e";
+// Navy del sistema: el círculo marca el radio de búsqueda sin competir con los pines coral.
+const RADIUS_COLOR = "#122544";
 
 const same = (a: LatLng, b: LatLng) => Math.abs(a.lat - b.lat) < 1e-4 && Math.abs(a.lng - b.lng) < 1e-4;
 
@@ -162,10 +162,10 @@ export function MatchMap({
   }, [ready, pins, activeId]);
 
   return (
-    <div className={cn("relative overflow-hidden rounded-lg bg-neutral-200 shadow-sm", className)}>
+    <div className={cn("relative overflow-hidden rounded-lg bg-map shadow-md", className)}>
       <div ref={container} className="absolute inset-0" />
       {failed && (
-        <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-neutral-700">
+        <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-text-3">
           No pudimos cargar el mapa.
         </div>
       )}

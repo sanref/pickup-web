@@ -54,7 +54,7 @@ export default async function MatchPage({ params, searchParams }: PageProps<"/pa
   const header = (
     <div className="flex flex-col gap-2.5">
       {justCreated && (
-        <div role="status" className="mb-2 rounded-md bg-accent-2-100 px-4 py-3 text-sm text-accent-2-800">
+        <div role="status" className="mb-2 rounded-sm bg-coral-100 px-4 py-3 text-sm text-navy">
           Listo, tu partido está publicado. Compartilo por WhatsApp para que la gente vote los horarios.
         </div>
       )}
@@ -63,8 +63,8 @@ export default async function MatchPage({ params, searchParams }: PageProps<"/pa
         <Badge variant="neutral">{[match.sport.name, levelLabel].filter(Boolean).join(" · ")}</Badge>
         <Badge variant="outline">{match.visibility === "public" ? "Público" : "Privado"}</Badge>
       </div>
-      <h1 className="m-0 font-heading text-[34px] leading-[1.05] sm:text-[40px]">{match.title}</h1>
-      <p className="m-0 max-w-[560px] text-[15px] whitespace-pre-line text-neutral-800">
+      <h1 className="m-0 text-[34px] leading-[1.05] tracking-[-0.03em] sm:text-[48px]">{match.title}</h1>
+      <p className="m-0 max-w-[560px] text-base whitespace-pre-line text-text-2">
         Partido armado por {match.organizer.displayName}.{match.description ? ` ${match.description}` : ""}
       </p>
     </div>
@@ -79,10 +79,10 @@ export default async function MatchPage({ params, searchParams }: PageProps<"/pa
           className="h-[150px] rounded-none"
         />
         <div className="flex flex-col gap-2 px-[18px] py-4">
-          <Link href={`/sedes/${match.venue.id}`} className="font-heading text-lg text-foreground no-underline">
+          <Link href={`/sedes/${match.venue.id}`} className="text-lg font-semibold tracking-[-0.02em] text-text no-underline">
             {match.venue.name}
           </Link>
-          <span className="text-[13px] text-neutral-700">
+          <span className="text-[13px] text-text-3">
             {match.venue.address} · {match.venue.city}
           </span>
           <a href={directions} target="_blank" rel="noopener noreferrer" className="mt-1 text-[13px]">
@@ -92,7 +92,7 @@ export default async function MatchPage({ params, searchParams }: PageProps<"/pa
       </div>
 
       <div className="flex flex-col gap-2.5 rounded-md bg-surface p-[18px]">
-        <span className="font-mono text-[11px] tracking-[0.1em] text-neutral-700 uppercase">Datos del partido</span>
+        <span className="text-[13px] font-semibold text-text-3">Datos del partido</span>
         <DataRow label="Precio" value={match.pricePerPerson == null ? "A definir" : match.pricePerPerson === 0 ? "Gratis" : `${money.format(match.pricePerPerson)} p/p`} />
         <DataRow label="Nivel" value={levelLabel ?? "Cualquiera"} />
         <DataRow label="Cupo" value={`${match.capacity} jugadores`} />
@@ -127,7 +127,7 @@ export default async function MatchPage({ params, searchParams }: PageProps<"/pa
 function DataRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-3 text-sm">
-      <span className="text-neutral-700">{label}</span>
+      <span className="text-text-3">{label}</span>
       <strong className="text-right font-semibold">{value}</strong>
     </div>
   );

@@ -118,7 +118,7 @@ export function ZonePicker({
         onKeyDown={onKeyDown}
         className={cn(
           variant === "bare" &&
-            "h-auto rounded-none border-0 bg-transparent px-0 text-[15px] font-semibold placeholder:text-foreground hover:border-0 focus-visible:outline-none",
+            "h-auto rounded-none border-0 bg-transparent px-0 text-[15px] font-semibold placeholder:text-text hover:border-0 focus-visible:outline-none",
         )}
       />
       {open && (
@@ -136,9 +136,9 @@ export function ZonePicker({
               e.preventDefault();
               choose(0);
             }}
-            className={cn("flex cursor-pointer items-center gap-2.5 rounded-sm px-3 py-2.5 text-sm font-semibold", highlight === 0 && "bg-neutral-100")}
+            className={cn("flex cursor-pointer items-center gap-2.5 rounded-sm px-3 py-2.5 text-sm font-semibold", highlight === 0 && "bg-surface-alt")}
           >
-            <LocateFixed className="size-4 text-accent" strokeWidth={2.75} aria-hidden />
+            <LocateFixed className="size-4 text-coral-700" aria-hidden />
             Usar mi ubicación
           </li>
           {places.map((s, i) => (
@@ -152,19 +152,19 @@ export function ZonePicker({
                 e.preventDefault();
                 choose(i + 1);
               }}
-              className={cn("flex cursor-pointer items-start gap-2.5 rounded-sm px-3 py-2", highlight === i + 1 && "bg-neutral-100")}
+              className={cn("flex cursor-pointer items-start gap-2.5 rounded-sm px-3 py-2", highlight === i + 1 && "bg-surface-alt")}
             >
-              <MapPin className="mt-0.5 size-4 shrink-0 text-neutral-600" strokeWidth={2.75} aria-hidden />
+              <MapPin className="mt-0.5 size-4 shrink-0 text-text-3" aria-hidden />
               <span className="flex flex-col">
                 <span className="text-sm font-semibold">{s.main}</span>
-                <span className="text-xs text-neutral-700">{s.secondary}</span>
+                <span className="text-xs text-text-3">{s.secondary}</span>
               </span>
             </li>
           ))}
-          {!typed && <li className="px-3 pt-1 pb-1.5 text-xs text-neutral-700">O escribí un barrio o una dirección.</li>}
-          {typed && failed && <li className="px-3 py-1.5 text-xs text-accent-700">No pudimos buscar en Google Maps.</li>}
+          {!typed && <li className="px-3 pt-1 pb-1.5 text-xs text-text-3">O escribí un barrio o una dirección.</li>}
+          {typed && failed && <li className="px-3 py-1.5 text-xs text-coral-700">No pudimos buscar en Google Maps.</li>}
           {places.length > 0 && (
-            <li aria-hidden className="px-3 pt-1 text-right text-[10px] text-neutral-600">
+            <li aria-hidden className="px-3 pt-1 text-right text-[10px] text-text-4">
               Resultados de Google
             </li>
           )}

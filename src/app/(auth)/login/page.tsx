@@ -30,7 +30,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       <GoogleButton next={next} />
       <OrDivider />
       <LoginForm next={next} />
-      <span className="text-center text-[13px] text-neutral-700">
+      <span className="text-center text-[13px] text-text-3">
         ¿No tenés cuenta? <Link href={withNext("/registro", next)}>Crear una</Link>
       </span>
     </AuthCard>

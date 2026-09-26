@@ -5,7 +5,7 @@ export function GoogleButton({ next }: { next: string }) {
   return (
     <form action={signInWithGoogle}>
       <input type="hidden" name="next" value={next} />
-      <SubmitButton variant="secondary" className="w-full gap-2.5" pendingLabel="Abriendo Google…">
+      <SubmitButton variant="outline" className="w-full gap-2.5" pendingLabel="Abriendo Google…">
         <GoogleLogo />
         Continuar con Google
       </SubmitButton>

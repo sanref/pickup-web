@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import { Caprasimo, Figtree } from "next/font/google";
+import { Familjen_Grotesk, Graduate } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const caprasimo = Caprasimo({
-  variable: "--font-caprasimo",
+const graduate = Graduate({
+  variable: "--font-graduate",
   weight: "400",
-  subsets: ["latin", "latin-ext"],
+  subsets: ["latin"],
 });
 
-const figtree = Figtree({
-  variable: "--font-figtree",
-  weight: ["400", "600", "700"],
+const grotesk = Familjen_Grotesk({
+  variable: "--font-grotesk",
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin", "latin-ext"],
 });
 
@@ -28,7 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="es-AR"
-      className={`${caprasimo.variable} ${figtree.variable} h-full antialiased`}
+      className={`${graduate.variable} ${grotesk.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         {children}

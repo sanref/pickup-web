@@ -13,21 +13,21 @@ export function VenueCard({ venue, active = false }: { venue: VenueSummary; acti
     <div
       className={cn(
         "flex flex-col gap-2 rounded-md border-2 bg-surface p-4 transition-colors duration-150 ease-out",
-        active ? "border-accent" : "border-transparent",
+        active ? "border-coral shadow-md" : "border-transparent",
       )}
     >
       <div className="flex items-start justify-between gap-3">
         <span className="font-semibold">{venue.name}</span>
         <div className="flex shrink-0 items-center gap-2">
           {venue.distanceKm != null && (
-            <span className="text-xs text-neutral-700">
+            <span className="text-xs tabular text-text-3">
               {venue.distanceKm.toLocaleString("es-AR", { maximumFractionDigits: 1 })} km
             </span>
           )}
           <VenueStatusBadge status={venue.status} />
         </div>
       </div>
-      <span className="text-sm text-neutral-800">
+      <span className="text-sm text-text-2">
         {venue.address} · {venue.city}
       </span>
       {venue.sports.length > 0 && (

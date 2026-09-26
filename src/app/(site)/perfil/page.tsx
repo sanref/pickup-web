@@ -25,17 +25,17 @@ export default async function ProfilePage() {
   const providers = new Set((accounts.data ?? []).map((a: { providerId: string }) => a.providerId));
 
   return (
-    <div className="mx-auto grid w-full max-w-[1200px] gap-10 px-4 py-10 min-[900px]:grid-cols-[300px_1fr] min-[900px]:px-10">
+    <div className="mx-auto grid w-full max-w-[1200px] gap-10 px-4 py-10 min-[900px]:grid-cols-[300px_minmax(0,1fr)] min-[900px]:px-10">
       <aside className="flex flex-col items-start gap-4">
-        <UserAvatar name={profile.displayName} src={profile.avatarUrl} className="size-[132px]" textClassName="text-[44px]" />
+        <UserAvatar name={profile.displayName} src={profile.avatarUrl} className="size-[128px]" textClassName="font-display text-[38px] font-normal" />
         <div className="flex flex-col gap-1">
-          <span className="font-heading text-2xl leading-tight">{profile.displayName}</span>
-          <span className="text-sm text-neutral-700">
+          <span className="text-[23px] leading-tight font-bold tracking-[-0.02em]">{profile.displayName}</span>
+          <span className="text-sm text-text-3">
             {[profile.city, joinedLabel(profile.createdAt)].filter(Boolean).join(" · ")}
           </span>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="accent-2">
+          <Badge variant="navy">
             {stats.played} {stats.played === 1 ? "partido jugado" : "partidos jugados"}
           </Badge>
           <Badge variant="neutral">

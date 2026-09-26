@@ -26,8 +26,8 @@ export default async function ManageMatchPage({ params }: PageProps<"/partidos/[
       </Link>
       <div className="flex flex-col gap-2">
         <StatusTag status={match.status} />
-        <h1 className="m-0 font-heading text-[34px] leading-tight">{match.title}</h1>
-        <span className="text-sm text-neutral-800">
+        <h1 className="m-0 text-[34px] leading-tight font-bold tracking-[-0.03em]">{match.title}</h1>
+        <span className="text-sm text-text-2">
           {match.venue.name} · cupo {match.capacity}
         </span>
       </div>

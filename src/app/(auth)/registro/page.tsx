@@ -18,7 +18,7 @@ export default async function RegisterPage({ searchParams }: PageProps<"/registr
       <GoogleButton next={next} />
       <OrDivider />
       <RegisterForm next={next} />
-      <span className="text-center text-[13px] text-neutral-700">
+      <span className="text-center text-[13px] text-text-3">
         ¿Ya tenés cuenta? <Link href={withNext("/login", next)}>Iniciar sesión</Link>
       </span>
     </AuthCard>

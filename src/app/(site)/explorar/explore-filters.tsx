@@ -15,8 +15,8 @@ export function isFiltered(f: ExploreFilters): boolean {
   return f.sport !== DEFAULT_FILTERS.sport || f.km !== DEFAULT_FILTERS.km || f.when !== DEFAULT_FILTERS.when || f.level !== DEFAULT_FILTERS.level;
 }
 
-// Tags seleccionables: el deporte activo en terracota (handoff), el nivel activo en salvia.
-function FilterTag({ on, tone, onClick, children }: { on: boolean; tone: "accent" | "accent-2"; onClick: () => void; children: React.ReactNode }) {
+// Tags seleccionables: el deporte activo en coral (handoff v2), el nivel activo en navy.
+function FilterTag({ on, tone, onClick, children }: { on: boolean; tone: "coral" | "navy"; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
       type="button"
@@ -25,10 +25,10 @@ function FilterTag({ on, tone, onClick, children }: { on: boolean; tone: "accent
       className={cn(
         "inline-flex min-h-11 cursor-pointer items-center rounded-full px-3.5 text-[13px] transition-colors duration-150 ease-out sm:min-h-9",
         on
-          ? tone === "accent"
-            ? "bg-accent-100 text-accent-800"
-            : "bg-accent-2-100 text-accent-2-800"
-          : "bg-neutral-100 text-neutral-800 hover:bg-neutral-200",
+          ? tone === "coral"
+            ? "bg-coral font-semibold text-navy"
+            : "bg-navy font-semibold text-surface"
+          : "bg-neutral-200 text-text-2 hover:bg-neutral-300",
       )}
     >
       {children}
@@ -41,7 +41,7 @@ function Block({ label, htmlFor, aside, children }: { label: string; htmlFor?: s
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-baseline justify-between gap-2">
-        <Label htmlFor={htmlFor} className="text-[11px] tracking-[0.08em] text-neutral-700 uppercase">
+        <Label htmlFor={htmlFor} className="text-[13px] font-semibold text-text">
           {label}
         </Label>
         {aside}
@@ -91,7 +91,7 @@ export function ExploreFiltersPanel({
       <Block label="Deporte">
         <div className="flex flex-wrap gap-1.5">
           {sports.map((s) => (
-            <FilterTag key={s.slug} tone="accent" on={filters.sport === s.slug} onClick={() => onChange({ sport: filters.sport === s.slug ? null : s.slug })}>
+            <FilterTag key={s.slug} tone="coral" on={filters.sport === s.slug} onClick={() => onChange({ sport: filters.sport === s.slug ? null : s.slug })}>
               {s.name}
             </FilterTag>
           ))}
@@ -107,17 +107,17 @@ export function ExploreFiltersPanel({
       <Block label="Nivel">
         <div className="flex flex-wrap gap-1.5">
           {SKILL_LEVELS.map((level) => (
-            <FilterTag key={level} tone="accent-2" on={filters.level === level} onClick={() => onChange({ level: filters.level === level ? null : level })}>
+            <FilterTag key={level} tone="navy" on={filters.level === level} onClick={() => onChange({ level: filters.level === level ? null : level })}>
               {SKILL_LEVEL_LABELS[level].long}
             </FilterTag>
           ))}
         </div>
-        <span className="text-xs text-neutral-700">Los partidos sin nivel aparecen siempre.</span>
+        <span className="text-xs text-text-3">Los partidos sin nivel aparecen siempre.</span>
       </Block>
 
       <Button
         variant="ghost"
-        className="self-start"
+        className="self-start underline underline-offset-4"
         disabled={!isFiltered(filters)}
         onClick={() => onChange({ sport: null, km: DEFAULT_FILTERS.km, when: DEFAULT_FILTERS.when, level: null })}
       >

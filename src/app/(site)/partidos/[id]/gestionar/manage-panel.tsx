@@ -69,8 +69,8 @@ export function ManagePanel({ matchId, status, capacity, timezone, autoConfirm, 
       {open && (
         <section className="flex flex-col gap-3.5">
           <div className="flex flex-col gap-1">
-            <h2 className="m-0 font-heading text-[22px]">Confirmar horario</h2>
-            <p className="m-0 text-sm text-neutral-800">
+            <h2 className="m-0 text-[21px] tracking-[-0.02em]">Confirmar horario</h2>
+            <p className="m-0 text-sm text-text-2">
               Podés confirmar aunque ninguna opción haya llegado al cupo. Los que votaron entran por orden de voto.
             </p>
           </div>
@@ -81,15 +81,15 @@ export function ManagePanel({ matchId, status, capacity, timezone, autoConfirm, 
                 <li key={slot.id} className="flex flex-col gap-3 rounded-md bg-surface p-4">
                   <div className="flex items-baseline justify-between gap-3">
                     <div className="flex flex-col">
-                      <span className="text-[11px] tracking-[0.08em] text-neutral-600 uppercase">{formatSlotDay(slot.startsAt, timezone)}</span>
-                      <span className="font-heading text-[22px] leading-tight">{formatTime(slot.startsAt, timezone)}</span>
+                      <span className="text-xs font-semibold text-text-3">{formatSlotDay(slot.startsAt, timezone)}</span>
+                      <span className="font-display text-[22px] leading-tight tabular">{formatTime(slot.startsAt, timezone)}</span>
                     </div>
-                    <span className="text-sm text-neutral-800">
+                    <span className="text-sm text-text-2">
                       {votes} de {capacity}
                     </span>
                   </div>
-                  <CapacityBar value={votes} capacity={capacity} leading={votes >= capacity} />
-                  <Button variant={votes >= capacity ? "default" : "secondary"} disabled={pending} onClick={() => setConfirming(slot)}>
+                  <CapacityBar value={votes} capacity={capacity} />
+                  <Button variant={votes >= capacity ? "primary" : "outline"} disabled={pending} onClick={() => setConfirming(slot)}>
                     Confirmar este horario
                   </Button>
                 </li>
@@ -97,7 +97,7 @@ export function ManagePanel({ matchId, status, capacity, timezone, autoConfirm, 
             })}
           </ul>
 
-          <div className="flex flex-col gap-2 rounded-md bg-neutral-100 p-4">
+          <div className="flex flex-col gap-2 rounded-md bg-surface p-4">
             <span className="text-sm font-semibold">Cuando una opción llegue al cupo</span>
             <Segmented
               name="auto-confirm"
@@ -119,13 +119,13 @@ export function ManagePanel({ matchId, status, capacity, timezone, autoConfirm, 
       )}
 
       <section className="flex flex-col gap-3.5">
-        <h2 className="m-0 font-heading text-[22px]">Anotados · {participants.length}</h2>
+        <h2 className="m-0 text-[21px] tracking-[-0.02em]">Anotados · {participants.length}</h2>
         <ul className="m-0 flex list-none flex-col divide-y divide-neutral-200 rounded-md bg-surface p-0 px-4">
           {participants.map((p) => (
             <li key={p.userId} className="flex items-center gap-3 py-3">
               <UserAvatar name={p.displayName} src={p.avatarUrl} className="size-[30px]" textClassName="text-[11px]" />
               <span className="min-w-0 flex-1 truncate text-sm">{p.displayName}</span>
-              <Badge variant={p.status === "confirmed" ? "accent-2" : "neutral"}>{STATUS_LABEL[p.status]}</Badge>
+              <Badge variant={p.status === "confirmed" ? "navy" : "neutral"}>{STATUS_LABEL[p.status]}</Badge>
               {editable && p.userId !== organizerId && (
                 <Button variant="ghost" size="sm" disabled={pending} onClick={() => setRemoving(p)}>
                   Quitar
@@ -137,10 +137,10 @@ export function ManagePanel({ matchId, status, capacity, timezone, autoConfirm, 
       </section>
 
       {editable && (
-        <section className="flex flex-col items-start gap-2 border-t border-divider pt-6">
-          <h2 className="m-0 font-heading text-lg">Cancelar el partido</h2>
-          <p className="m-0 text-sm text-neutral-800">Les avisamos a todos los anotados. No se puede deshacer.</p>
-          <Button variant="secondary" className="border-accent text-accent-700" disabled={pending} onClick={() => setCancelling(true)}>
+        <section className="flex flex-col items-start gap-2 border-t border-border pt-6">
+          <h2 className="m-0 text-lg font-semibold tracking-[-0.02em]">Cancelar el partido</h2>
+          <p className="m-0 text-sm text-text-2">Les avisamos a todos los anotados. No se puede deshacer.</p>
+          <Button variant="outline" className="border-coral text-coral-700" disabled={pending} onClick={() => setCancelling(true)}>
             Cancelar partido
           </Button>
         </section>
@@ -160,16 +160,16 @@ export function ManagePanel({ matchId, status, capacity, timezone, autoConfirm, 
               <dl className="m-0 flex flex-col gap-3 text-sm">
                 <div>
                   <dt className="font-semibold">Confirmados ({preview.confirmed.length} de {capacity})</dt>
-                  <dd className="m-0 text-neutral-800">{names(preview.confirmed)}</dd>
+                  <dd className="m-0 text-text-2">{names(preview.confirmed)}</dd>
                 </div>
                 <div>
                   <dt className="font-semibold">En lista de espera ({preview.waitlist.length})</dt>
-                  <dd className="m-0 text-neutral-800">{names(preview.waitlist)}</dd>
+                  <dd className="m-0 text-text-2">{names(preview.waitlist)}</dd>
                 </div>
                 {preview.others.length > 0 && (
                   <div>
                     <dt className="font-semibold">No votaron este horario ({preview.others.length})</dt>
-                    <dd className="m-0 text-neutral-800">{names(preview.others)}. Les avisamos para que se sumen si queda lugar.</dd>
+                    <dd className="m-0 text-text-2">{names(preview.others)}. Les avisamos para que se sumen si queda lugar.</dd>
                   </div>
                 )}
               </dl>

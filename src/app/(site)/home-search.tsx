@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import { DEFAULT_FILTERS, WHEN_OPTIONS, exploreHref, type When } from "@/lib/val
 function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <label htmlFor={htmlFor} className="text-[10px] tracking-[0.08em] text-neutral-600 uppercase">
+      <label htmlFor={htmlFor} className="text-[11px] text-text-3">
         {label}
       </label>
       {children}
@@ -18,9 +19,9 @@ function Field({ label, htmlFor, children }: { label: string; htmlFor: string; c
   );
 }
 
-const Divider = () => <span aria-hidden className="hidden h-8 w-px shrink-0 bg-neutral-300 min-[640px]:block" />;
+const Divider = () => <span aria-hidden className="hidden h-8 w-px shrink-0 bg-border min-[640px]:block" />;
 
-const selectClass = "w-full cursor-pointer appearance-none bg-transparent text-[15px] font-semibold text-foreground";
+const selectClass = "w-full cursor-pointer appearance-none bg-transparent text-[15px] font-semibold text-text";
 
 // Buscador del hero (Deporte / Zona / Cuándo): lleva a /explorar con esos filtros.
 export function HomeSearch({ sports }: { sports: { slug: string; name: string }[] }) {
@@ -47,7 +48,7 @@ export function HomeSearch({ sports }: { sports: { slug: string; name: string }[
     <form
       role="search"
       onSubmit={submit}
-      className="flex max-w-[560px] flex-col gap-3 rounded-lg bg-surface p-4 shadow-sm min-[640px]:flex-row min-[640px]:items-center min-[640px]:gap-2.5 min-[640px]:rounded-full min-[640px]:py-2 min-[640px]:pr-2 min-[640px]:pl-5"
+      className="flex max-w-[560px] flex-col gap-3 rounded-md bg-surface p-4 shadow-md min-[640px]:flex-row min-[640px]:items-center min-[640px]:gap-2.5 min-[640px]:rounded-full min-[640px]:py-2 min-[640px]:pr-2 min-[640px]:pl-[22px]"
     >
       <Field label="Deporte" htmlFor={ids.sport}>
         <select id={ids.sport} value={sport} onChange={(e) => setSport(e.target.value)} className={selectClass}>
@@ -73,8 +74,8 @@ export function HomeSearch({ sports }: { sports: { slug: string; name: string }[
           ))}
         </select>
       </Field>
-      <Button type="submit" size="lg" className="shrink-0 min-[640px]:ml-auto">
-        Buscar
+      <Button type="submit" size="icon" aria-label="Buscar" className="shrink-0 min-[640px]:ml-auto">
+        <ArrowRight />
       </Button>
     </form>
   );

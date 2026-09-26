@@ -10,21 +10,21 @@ const NAV_LINKS = [
   { href: "/#como-funciona", label: "Cómo funciona" },
 ];
 
-// Barra del handoff: fondo surface, marca en Caprasimo 24px a la izquierda.
-// Sin sesión: "Iniciar sesión" + "Crear partido". Con sesión: "Crear partido" + avatar con menú.
+// Barra del handoff v2: fondo navy, logo en Graduate 23px a la izquierda, link activo en coral.
+// Sin sesión: "Iniciar sesión" en outline claro + "Crear partido". Con sesión: "Crear partido" + avatar con menú.
 export async function SiteHeader() {
   const actor = await getActor();
   return (
-    <header className="flex items-center gap-7 bg-surface px-4 py-4 min-[900px]:px-10 min-[900px]:py-5">
-      <Link href="/" className="mr-auto font-heading text-2xl text-foreground no-underline">
+    <header className="flex items-center gap-[26px] bg-navy px-4 py-4 min-[900px]:px-10">
+      <Link href="/" className="mr-auto font-display text-[23px] text-surface no-underline">
         PickUp
       </Link>
-      <nav className="hidden items-center gap-7 min-[900px]:flex">
+      <nav className="hidden items-center gap-[26px] min-[900px]:flex">
         {NAV_LINKS.map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            className="text-sm text-foreground no-underline transition-colors duration-150 ease-out hover:text-accent aria-[current=page]:text-accent"
+            className="text-sm text-navy-200 no-underline transition-colors duration-150 ease-out hover:text-coral aria-[current=page]:text-coral"
           >
             {link.label}
           </Link>
@@ -32,7 +32,7 @@ export async function SiteHeader() {
       </nav>
       <div className="flex items-center gap-2.5">
         {!actor && (
-          <Button variant="secondary" asChild className="hidden sm:inline-flex">
+          <Button variant="outline-light" asChild className="hidden sm:inline-flex">
             <Link href="/login">Iniciar sesión</Link>
           </Button>
         )}

@@ -10,7 +10,7 @@ export type SportSelection = { sportId: number; level: SkillLevel };
 const LEVEL_OPTIONS_LONG = SKILL_LEVELS.map((value) => ({ value, label: SKILL_LEVEL_LABELS[value].long }));
 const LEVEL_OPTIONS_SHORT = SKILL_LEVELS.map((value) => ({ value, label: SKILL_LEVEL_LABELS[value].short }));
 
-// Tags multi-selección (terracota = elegido) y, por cada deporte elegido, su nivel autodeclarado.
+// Tags multi-selección (navy = elegido) y, por cada deporte elegido, su nivel autodeclarado.
 export function SportPicker({
   sports,
   value,
@@ -47,7 +47,7 @@ export function SportPicker({
           {chosen.map((sport) => (
             <div
               key={sport.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-neutral-100 px-4 py-3"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-sm bg-surface px-4 py-3"
             >
               <span className="text-sm font-semibold">
                 {compactLevels ? sport.name : `Tu nivel en ${sport.name.toLowerCase()}`}
@@ -62,7 +62,7 @@ export function SportPicker({
               />
             </div>
           ))}
-          <span className="text-xs text-neutral-700">
+          <span className="text-xs text-text-3">
             Lo declarás vos. Sirve para que los partidos queden parejos, no es un ranking.
           </span>
         </div>
@@ -71,7 +71,7 @@ export function SportPicker({
   );
 }
 
-// Tags multi-selección: terracota = elegido.
+// Tags multi-selección: navy = elegido.
 export function SportTags({
   sports,
   selected,
@@ -92,8 +92,8 @@ export function SportTags({
             aria-pressed={on}
             onClick={() => onToggle(sport.id)}
             className={cn(
-              "min-h-11 rounded-full px-3.5 text-[13px] tracking-[0.02em] transition-colors duration-150 ease-out sm:min-h-9",
-              on ? "bg-accent-100 text-accent-800" : "bg-neutral-100 text-neutral-800 hover:bg-neutral-200",
+              "min-h-11 rounded-full px-3.5 text-[13px] transition-colors duration-150 ease-out sm:min-h-9",
+              on ? "bg-navy font-semibold text-surface" : "bg-neutral-200 text-text-2 hover:bg-neutral-300",
             )}
           >
             {sport.name}

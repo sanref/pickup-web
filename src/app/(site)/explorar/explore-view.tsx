@@ -92,27 +92,27 @@ export function ExploreView({
   const filtersPanel = <ExploreFiltersPanel filters={current} sports={sports} zone={zone} onChange={(patch) => update(patch)} />;
 
   return (
-    <div className="mx-auto grid w-full max-w-[1400px] items-start gap-6 px-4 pt-4 pb-10 min-[900px]:grid-cols-[1fr_380px] min-[900px]:px-10 min-[1200px]:grid-cols-[230px_1fr_420px]">
-      <aside aria-label="Filtros" className="sticky top-4 hidden min-[1200px]:block">
+    <div className="mx-auto grid w-full max-w-[1400px] items-start gap-[26px] px-4 pt-4 pb-11 min-[900px]:grid-cols-[minmax(0,1fr)_auto] min-[900px]:px-10 min-[900px]:pt-[26px] min-[1200px]:grid-cols-[230px_minmax(0,1fr)_auto]">
+      <aside aria-label="Filtros" className="sticky top-0 hidden pt-4 min-[1200px]:block">
         {filtersPanel}
       </aside>
 
       <section className={cn("min-w-0 flex-col gap-3.5", view === "mapa" ? "hidden min-[900px]:flex" : "flex")}>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <div className="flex min-w-0 flex-col">
-            <h1 className="m-0 font-heading text-2xl leading-tight">
+            <h1 className="m-0 text-[26px] leading-tight tracking-[-0.02em]">
               {total} {total === 1 ? "partido con lugar" : "partidos con lugar"}
             </h1>
-            <span className="text-[13px] text-neutral-700">
+            <span className="text-[13px] text-text-3">
               A menos de {current.km} km de {zone}
             </span>
           </div>
-          <label className="ml-auto flex items-center gap-1 text-[13px] text-neutral-700">
+          <label className="ml-auto flex items-center gap-1 text-[13px] text-text-3">
             Ordenar por:
             <select
               value={current.sort}
               onChange={(e) => update({ sort: e.target.value as Sort }, "replace")}
-              className="cursor-pointer rounded-full bg-transparent py-1 font-semibold text-foreground"
+              className="cursor-pointer rounded-full bg-transparent py-1 font-semibold text-text"
             >
               {SORT_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -137,32 +137,32 @@ export function ExploreView({
                 onMouseEnter={() => setActiveId(m.id)}
                 onMouseLeave={() => setActiveId(null)}
               >
-                <Link href={`/partidos/${m.id}`} onFocus={() => setActiveId(m.id)} className="block rounded-md text-foreground no-underline">
+                <Link href={`/partidos/${m.id}`} onFocus={() => setActiveId(m.id)} className="block rounded-md text-text no-underline">
                   <MatchCard match={m} active={m.id === activeId} />
                 </Link>
               </li>
             ))}
             {total > matches.length && (
-              <li className="px-1 text-[13px] text-neutral-700">
+              <li className="px-1 text-[13px] text-text-3">
                 Mostramos los {matches.length} {current.sort === "pronto" ? "más próximos" : "más cercanos"}. Filtrá por deporte o fecha para ver otros.
               </li>
             )}
           </ul>
         ) : (
           <div aria-busy={pending} className={cn("flex flex-col items-start gap-3 rounded-lg bg-surface p-8", pending && "opacity-60")}>
-            <span className="font-heading text-2xl">No hay partidos con lugar por acá</span>
-            <span className="text-sm text-neutral-800">
+            <span className="text-2xl font-bold tracking-[-0.02em]">No hay partidos con lugar por acá</span>
+            <span className="text-sm text-text-2">
               {current.km < RADIUS_KM.max ? "Probá ampliar la distancia o cambiar los filtros. " : "Probá cambiar los filtros. "}
               O armá uno: con dos o tres horarios posibles se completa rápido.
             </span>
             <div className="flex flex-wrap gap-2.5">
               {current.km < RADIUS_KM.max && (
-                <Button variant="secondary" onClick={() => update({ km: widerKm })}>
+                <Button variant="outline" onClick={() => update({ km: widerKm })}>
                   Ampliar a {widerKm} km
                 </Button>
               )}
               {isFiltered(current) && (
-                <Button variant="secondary" onClick={() => update({ sport: null, when: "todas", level: null })}>
+                <Button variant="outline" onClick={() => update({ sport: null, when: "todas", level: null })}>
                   Quitar filtros
                 </Button>
               )}
@@ -174,7 +174,7 @@ export function ExploreView({
         )}
       </section>
 
-      <div className={cn("sticky top-4 flex-col gap-3", view === "lista" ? "hidden min-[900px]:flex" : "flex")}>
+      <div className={cn("sticky top-0 flex-col gap-3 pt-4 min-[900px]:w-[400px]", view === "lista" ? "hidden min-[900px]:flex" : "flex")}>
         <div className="min-[900px]:hidden">
           <MobileBar activeFilters={activeFilters} view={view} onView={setView} onOpenFilters={() => setFiltersOpen(true)} />
         </div>
@@ -185,9 +185,9 @@ export function ExploreView({
           activeId={activeId}
           onPinClick={onPinClick}
           onCenterChange={onCenterChange}
-          className="h-[calc(100dvh-200px)] min-h-[360px] min-[900px]:h-[620px]"
+          className="h-[calc(100dvh-200px)] min-h-[360px] min-[900px]:h-[600px]"
         />
-        <span className="text-xs text-neutral-700">Mové el mapa para buscar en otra zona.</span>
+        <span className="w-fit rounded-full bg-navy px-3 py-1.5 text-xs text-navy-200">Moviendo el mapa se actualiza la lista</span>
       </div>
 
       <Dialog open={filtersOpen} onOpenChange={setFiltersOpen}>
@@ -219,8 +219,8 @@ function MobileBar({
 }) {
   return (
     <div className="flex items-center gap-2.5 min-[1200px]:hidden">
-      <Button variant="secondary" onClick={onOpenFilters}>
-        <SlidersHorizontal strokeWidth={2.75} aria-hidden />
+      <Button variant="outline" onClick={onOpenFilters}>
+        <SlidersHorizontal aria-hidden />
         Filtros{activeFilters > 0 && ` · ${activeFilters}`}
       </Button>
       <div className="ml-auto min-[900px]:hidden">

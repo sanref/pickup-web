@@ -53,13 +53,13 @@ export function OnboardingWizard({ sports, initial, next }: { sports: SportOptio
     >
       <div className="flex gap-1.5" aria-label={`Paso ${step + 1} de ${STEPS.length}`} role="progressbar" aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1}>
         {STEPS.map((s, i) => (
-          <div key={s.title} className={cn("h-1.5 flex-1 rounded-full transition-colors duration-150", i <= step ? "bg-accent" : "bg-neutral-300")} />
+          <div key={s.title} className={cn("h-1.5 flex-1 rounded-full transition-colors duration-150", i <= step ? "bg-coral" : "bg-neutral-300")} />
         ))}
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <h1 className="m-0 font-heading text-[30px] leading-tight">{current.title}</h1>
-        <p className="m-0 text-sm text-neutral-800">{current.description}</p>
+        <h1 className="m-0 text-[29px] leading-tight font-bold tracking-[-0.03em]">{current.title}</h1>
+        <p className="m-0 text-sm text-text-2">{current.description}</p>
       </div>
 
       <FormMessage kind="error">{error}</FormMessage>

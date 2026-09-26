@@ -42,17 +42,17 @@ function summary(m: MyMatch, tone: Tone): string {
 function tag(m: MyMatch, tone: Tone) {
   switch (tone) {
     case "confirmed":
-      return <Badge variant="accent-2">{m.isOrganizer ? "Confirmado · organizás vos" : "Confirmado"}</Badge>;
+      return <Badge variant="navy">{m.isOrganizer ? "Confirmado · organizás vos" : "Confirmado"}</Badge>;
     case "waitlist":
       return <Badge variant="neutral">Sos suplente · {m.waitlistPosition ?? "?"}º en espera</Badge>;
     case "other-slot":
-      return <Badge variant="accent">Se confirmó otro horario</Badge>;
+      return <Badge variant="coral">Se confirmó otro horario</Badge>;
     case "pending":
-      return <Badge variant="accent">Te falta votar</Badge>;
+      return <Badge variant="coral">Te falta votar</Badge>;
     case "organizer":
       return <Badge variant="outline">Organizás vos</Badge>;
     case "voted":
-      return <Badge variant="accent-2">{m.myVotes === 1 ? "Votaste 1 horario" : `Votaste ${m.myVotes} horarios`}</Badge>;
+      return <Badge variant="navy">{m.myVotes === 1 ? "Votaste 1 horario" : `Votaste ${m.myVotes} horarios`}</Badge>;
     case "past":
       return <Badge variant={m.status === "cancelled" ? "outline" : "neutral"}>{m.status === "cancelled" ? "Cancelado" : "Jugado"}</Badge>;
   }
@@ -60,7 +60,7 @@ function tag(m: MyMatch, tone: Tone) {
 
 function MatchRow({ m, tone }: { m: MyMatch; tone: Tone }) {
   const { top, main } = dateBlock(m);
-  const accent = tone === "pending" || tone === "other-slot";
+  const needsYou = tone === "pending" || tone === "other-slot";
   const primaryLabel =
     tone === "pending" ? "Votar horarios" : tone === "other-slot" ? "Sumarme" : tone === "organizer" ? "Gestionar" : "Ver partido";
   const href = tone === "organizer" ? `/partidos/${m.id}/gestionar` : `/partidos/${m.id}`;
@@ -68,23 +68,23 @@ function MatchRow({ m, tone }: { m: MyMatch; tone: Tone }) {
     <li
       className={cn(
         "flex flex-col gap-4 rounded-md bg-surface p-5 sm:flex-row sm:items-center",
-        tone === "confirmed" && "border-l-[6px] border-accent-2 shadow-sm",
-        accent && "border-l-[6px] border-accent shadow-sm",
+        tone === "confirmed" && "border-l-[6px] border-navy shadow-sm",
+        needsYou && "border-l-[6px] border-coral shadow-sm",
         tone === "past" && "opacity-80",
       )}
     >
-      <div className="flex w-24 shrink-0 flex-col">
-        <span className="text-[11px] tracking-[0.08em] text-neutral-600 uppercase">{top}</span>
-        <span className="font-heading text-[26px] leading-[1.1]">{main}</span>
+      <div className="flex w-[92px] shrink-0 flex-col">
+        <span className="text-xs font-semibold text-text-3">{top}</span>
+        <span className="font-display text-[25px] leading-[1.1] tabular">{main}</span>
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <div className="flex flex-wrap items-center gap-2">
-          <Link href={`/partidos/${m.id}`} className="font-heading text-xl text-foreground no-underline">
+          <Link href={`/partidos/${m.id}`} className="text-lg font-semibold tracking-[-0.02em] text-text no-underline">
             {m.title}
           </Link>
           {tag(m, tone)}
         </div>
-        <span className="text-[13px] text-neutral-700">{summary(m, tone)}</span>
+        <span className="text-[13px] text-text-3">{summary(m, tone)}</span>
       </div>
       <div className="flex shrink-0 gap-2">
         {tone === "organizer" && (
@@ -92,7 +92,7 @@ function MatchRow({ m, tone }: { m: MyMatch; tone: Tone }) {
             <Link href={`/partidos/${m.id}`}>Ver</Link>
           </Button>
         )}
-        <Button asChild variant={accent ? "default" : "secondary"}>
+        <Button asChild variant={needsYou ? "primary" : "outline"}>
           <Link href={href}>{primaryLabel}</Link>
         </Button>
       </div>
@@ -104,7 +104,7 @@ function Group({ label, items, tone }: { label: string; items: MyMatch[]; tone: 
   if (items.length === 0) return null;
   return (
     <section className="flex flex-col gap-3">
-      <span className="font-mono text-[11px] tracking-[0.1em] text-neutral-700 uppercase">{label}</span>
+      <span className="text-[13px] font-semibold text-text-3">{label}</span>
       <ul className="m-0 flex list-none flex-col gap-3 p-0">
         {items.map((m) => (
           <MatchRow key={m.id} m={m} tone={tone} />
@@ -117,13 +117,13 @@ function Group({ label, items, tone }: { label: string; items: MyMatch[]; tone: 
 function Empty({ title, text }: { title: string; text: string }) {
   return (
     <div className="flex flex-col items-start gap-3 rounded-lg bg-surface p-8">
-      <span className="font-heading text-2xl">{title}</span>
-      <span className="text-sm text-neutral-800">{text}</span>
+      <span className="text-2xl font-bold tracking-[-0.02em]">{title}</span>
+      <span className="text-sm text-text-2">{text}</span>
       <div className="flex flex-wrap gap-2.5">
         <Button asChild>
           <Link href="/partidos/nuevo">Crear partido</Link>
         </Button>
-        <Button asChild variant="secondary">
+        <Button asChild variant="outline">
           <Link href="/explorar">Buscar partidos</Link>
         </Button>
       </div>
@@ -159,16 +159,16 @@ export default async function MyMatchesPage({ searchParams }: PageProps<"/mis-pa
   return (
     <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-6 px-4 pt-7 pb-11 min-[900px]:px-10">
       <div className="flex flex-wrap items-center gap-4">
-        <h1 className="m-0 font-heading text-[36px] leading-tight">Mis partidos</h1>
-        <nav aria-label="Filtrar partidos" className="inline-flex overflow-hidden rounded-full border border-divider sm:ml-auto">
+        <h1 className="m-0 text-[34px] leading-tight tracking-[-0.03em]">Mis partidos</h1>
+        <nav aria-label="Filtrar partidos" className="inline-flex overflow-hidden rounded-full border border-border-input bg-surface sm:ml-auto">
           {tabs.map((t) => (
             <Link
               key={t.id}
               href={`/mis-partidos?tab=${t.id}`}
               aria-current={t.id === tab ? "page" : undefined}
               className={cn(
-                "inline-flex min-h-11 items-center px-3.5 text-[13px] text-foreground no-underline transition-colors duration-150 sm:min-h-0 sm:py-[7px] [&+&]:border-l [&+&]:border-divider",
-                t.id === tab ? "bg-accent text-background" : "hover:bg-foreground/7",
+                "inline-flex min-h-11 items-center px-3.5 text-[13px] no-underline transition-colors duration-150 sm:min-h-0 sm:py-[7px] [&+&]:border-l [&+&]:border-border-input",
+                t.id === tab ? "bg-navy font-semibold text-surface" : "text-text-2 hover:bg-navy/6",
               )}
             >
               {t.label}

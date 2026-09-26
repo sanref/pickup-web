@@ -5,11 +5,11 @@ import type { MatchParticipant } from "@/server/services/matches";
 function Person({ p, index, you }: { p: MatchParticipant; index?: number; you: boolean }) {
   return (
     <li className="flex items-center gap-2.5 py-1.5">
-      {index != null && <span className="w-5 text-right text-xs text-neutral-600">{index}º</span>}
+      {index != null && <span className="w-5 text-right text-xs tabular text-text-3">{index}º</span>}
       <UserAvatar name={p.displayName} src={p.avatarUrl} className="size-[26px]" textClassName="text-[10px]" />
       <span className="truncate text-sm">
         {p.displayName}
-        {you && <span className="text-neutral-600"> (vos)</span>}
+        {you && <span className="text-text-3"> (vos)</span>}
       </span>
       {p.isOrganizer && (
         <Badge variant="outline" className="px-2 py-0.5 text-[10px]">
@@ -27,9 +27,9 @@ export function MatchRoster({ participants, capacity, viewerId }: { participants
   const interested = participants.filter((p) => p.status === "interested");
 
   return (
-    <div className="grid gap-5 rounded-[24px] bg-neutral-100 p-5 shadow-sm sm:grid-cols-2">
+    <div className="grid gap-5 rounded-lg bg-surface p-5 shadow-sm sm:grid-cols-2">
       <section className="flex flex-col gap-2">
-        <span className="font-mono text-[11px] tracking-[0.1em] text-neutral-700 uppercase">
+        <span className="text-[13px] font-semibold text-text-3">
           Confirmados · {confirmed.length} de {capacity}
         </span>
         <ul className="m-0 list-none p-0">
@@ -40,7 +40,7 @@ export function MatchRoster({ participants, capacity, viewerId }: { participants
       </section>
       <div className="flex flex-col gap-5">
         <section className="flex flex-col gap-2">
-          <span className="font-mono text-[11px] tracking-[0.1em] text-neutral-700 uppercase">Lista de espera · {waitlist.length}</span>
+          <span className="text-[13px] font-semibold text-text-3">Lista de espera · {waitlist.length}</span>
           {waitlist.length ? (
             <ul className="m-0 list-none p-0">
               {waitlist.map((p, i) => (
@@ -48,12 +48,12 @@ export function MatchRoster({ participants, capacity, viewerId }: { participants
               ))}
             </ul>
           ) : (
-            <span className="text-sm text-neutral-700">Nadie esperando.</span>
+            <span className="text-sm text-text-3">Nadie esperando.</span>
           )}
         </section>
         {interested.length > 0 && (
           <section className="flex flex-col gap-2">
-            <span className="font-mono text-[11px] tracking-[0.1em] text-neutral-700 uppercase">Votaron otro horario · {interested.length}</span>
+            <span className="text-[13px] font-semibold text-text-3">Votaron otro horario · {interested.length}</span>
             <ul className="m-0 list-none p-0">
               {interested.map((p) => (
                 <Person key={p.userId} p={p} you={p.userId === viewerId} />

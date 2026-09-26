@@ -36,26 +36,26 @@ export default async function VenuePage({ params, searchParams }: PageProps<"/se
         </Link>
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="m-0 font-heading text-[34px] leading-tight">{venue.name}</h1>
+            <h1 className="m-0 text-[34px] leading-tight font-bold tracking-[-0.03em]">{venue.name}</h1>
             <VenueStatusBadge status={venue.status} />
           </div>
-          <span className="text-neutral-800">
+          <span className="text-text-2">
             {venue.address} · {venue.city}
           </span>
         </div>
         {alreadyExisted && (
-          <div className="rounded-md bg-accent-2-100 px-4 py-3 text-sm text-accent-2-800">
+          <div className="rounded-md bg-coral-100 px-4 py-3 text-sm text-navy">
             Esta sede ya estaba cargada, así que usamos la que había.
           </div>
         )}
         {venue.status === "pending" && (
-          <div className="rounded-md bg-accent-2-100 px-4 py-3 text-sm text-accent-2-800">
+          <div className="rounded-md bg-coral-100 px-4 py-3 text-sm text-navy">
             La estamos revisando. Mientras tanto ya podés armar partidos acá.
           </div>
         )}
         {venue.sports.length > 0 && (
           <div className="flex flex-col gap-2">
-            <span className="text-xs text-foreground/70">Se juega</span>
+            <span className="text-xs text-text/70">Se juega</span>
             <div className="flex flex-wrap gap-2">
               {venue.sports.map((s) => (
                 <Badge key={s.id} variant="neutral">
@@ -69,7 +69,7 @@ export default async function VenuePage({ params, searchParams }: PageProps<"/se
           <Button asChild>
             <Link href={`/partidos/nuevo?sede=${venue.id}`}>Armar un partido acá</Link>
           </Button>
-          <Button asChild variant="secondary">
+          <Button asChild variant="outline">
             <a href={directions} target="_blank" rel="noopener noreferrer">
               Cómo llegar
             </a>
