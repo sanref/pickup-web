@@ -115,6 +115,8 @@
   --input: #c3cad3;
   --ring: #ff6b4a;
   --radius: 20px;
+  /* Alto de la barra de navegación fija: botón de 44px + 16px arriba y abajo. */
+  --site-header-h: 76px;
 }
 
 @layer base {
@@ -124,6 +126,8 @@
 
   html {
     @apply font-sans;
+    /* Que los anclas (#como-funciona) no queden tapadas por la barra fija. */
+    scroll-padding-top: var(--site-header-h);
   }
 
   body {

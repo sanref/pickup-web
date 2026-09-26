@@ -93,7 +93,7 @@ export function ExploreView({
 
   return (
     <div className="mx-auto grid w-full max-w-[1400px] items-start gap-[26px] px-4 pt-4 pb-11 min-[900px]:grid-cols-[minmax(0,1fr)_auto] min-[900px]:px-10 min-[900px]:pt-[26px] min-[1200px]:grid-cols-[230px_minmax(0,1fr)_auto]">
-      <aside aria-label="Filtros" className="sticky top-0 hidden pt-4 min-[1200px]:block">
+      <aside aria-label="Filtros" className="sticky top-(--site-header-h) hidden pt-4 min-[1200px]:block">
         {filtersPanel}
       </aside>
 
@@ -174,7 +174,7 @@ export function ExploreView({
         )}
       </section>
 
-      <div className={cn("sticky top-0 flex-col gap-3 pt-4 min-[900px]:w-[400px]", view === "lista" ? "hidden min-[900px]:flex" : "flex")}>
+      <div className={cn("sticky top-(--site-header-h) flex-col gap-3 pt-4 min-[900px]:w-[400px]", view === "lista" ? "hidden min-[900px]:flex" : "flex")}>
         <div className="min-[900px]:hidden">
           <MobileBar activeFilters={activeFilters} view={view} onView={setView} onOpenFilters={() => setFiltersOpen(true)} />
         </div>

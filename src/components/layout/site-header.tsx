@@ -12,10 +12,11 @@ const NAV_LINKS = [
 
 // Barra del handoff v2: fondo navy, logo en Graduate 23px a la izquierda, link activo en coral.
 // Sin sesión: "Iniciar sesión" en outline claro + "Crear partido". Con sesión: "Crear partido" + avatar con menú.
+// Siempre fija arriba; su alto es --site-header-h, que usan los demás elementos sticky para quedar debajo.
 export async function SiteHeader() {
   const actor = await getActor();
   return (
-    <header className="flex items-center gap-[26px] bg-navy px-4 py-4 min-[900px]:px-10">
+    <header className="sticky top-0 z-40 flex h-(--site-header-h) shrink-0 items-center gap-[26px] bg-navy px-4 min-[900px]:px-10">
       <Link href="/" className="mr-auto font-display text-[23px] text-surface no-underline">
         PickUp
       </Link>

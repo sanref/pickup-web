@@ -32,7 +32,7 @@ export function VenueBrowser({ venues }: { venues: VenueSummary[] }) {
         pins={pins}
         activeId={activeId}
         onPinClick={openVenue}
-        className="order-first h-[320px] min-[900px]:sticky min-[900px]:top-4 min-[900px]:order-none min-[900px]:h-[620px]"
+        className="order-first h-[320px] min-[900px]:sticky min-[900px]:top-[calc(var(--site-header-h)+1rem)] min-[900px]:order-none min-[900px]:h-[620px]"
       />
     </div>
   );
