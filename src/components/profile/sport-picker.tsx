@@ -47,7 +47,7 @@ export function SportPicker({
           {chosen.map((sport) => (
             <div
               key={sport.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-sm bg-surface px-4 py-3"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-sm border border-border-inset bg-inset px-4 py-3"
             >
               <span className="text-sm font-semibold">
                 {compactLevels ? sport.name : `Tu nivel en ${sport.name.toLowerCase()}`}
@@ -93,7 +93,7 @@ export function SportTags({
             onClick={() => onToggle(sport.id)}
             className={cn(
               "min-h-11 rounded-full px-3.5 text-[13px] transition-colors duration-150 ease-out sm:min-h-9",
-              on ? "bg-navy font-semibold text-surface" : "bg-neutral-200 text-text-2 hover:bg-neutral-300",
+              on ? "bg-navy font-semibold text-surface" : "tag-neutral hover:bg-neutral-300",
             )}
           >
             {sport.name}

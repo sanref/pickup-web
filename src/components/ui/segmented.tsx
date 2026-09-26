@@ -29,7 +29,7 @@ export function Segmented<T extends string>({
       aria-label={label}
       aria-orientation={orientation}
       className={cn(
-        "inline-flex overflow-hidden border border-border-input bg-surface",
+        "inline-flex overflow-hidden border border-edge bg-surface shadow-xs",
         vertical ? "w-full flex-col rounded-sm" : "w-fit rounded-full",
       )}
     >
@@ -41,7 +41,7 @@ export function Segmented<T extends string>({
             className={cn(
               "relative inline-flex min-h-11 cursor-pointer items-center px-3 transition-colors duration-150 ease-out sm:min-h-0",
               size === "sm" ? "py-1.5 text-xs" : "py-[7px] text-[13px]",
-              vertical ? "[&+&]:border-t [&+&]:border-border-input" : "[&+&]:border-l [&+&]:border-border-input",
+              vertical ? "[&+&]:border-t [&+&]:border-border" : "[&+&]:border-l [&+&]:border-border",
               "has-[input:focus-visible]:outline-2 has-[input:focus-visible]:-outline-offset-2 has-[input:focus-visible]:outline-coral",
               checked ? "bg-navy font-semibold text-surface" : "text-text-2 hover:bg-navy/6",
             )}

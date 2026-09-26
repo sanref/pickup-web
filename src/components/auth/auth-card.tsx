@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-// Tarjeta del handoff v2: 460px (620px en onboarding), padding 36/34, radio 24px, sombra lg.
+// Tarjeta del handoff v3: 460px (620px en onboarding), padding 36/34, radio 24px, borde edge y sombra xl.
 export function AuthCard({
   title,
   description,
@@ -18,7 +18,7 @@ export function AuthCard({
   return (
     <div
       className={cn(
-        "flex w-full flex-col gap-[18px] rounded-[24px] bg-surface px-6 py-8 shadow-lg sm:px-[34px] sm:py-9",
+        "flex w-full flex-col gap-[18px] rounded-[24px] border border-edge bg-surface px-6 py-8 shadow-xl sm:px-[34px] sm:py-9",
         wide ? "max-w-[620px] gap-5" : "max-w-[460px]",
       )}
     >

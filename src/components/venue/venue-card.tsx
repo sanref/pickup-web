@@ -12,8 +12,8 @@ export function VenueCard({ venue, active = false }: { venue: VenueSummary; acti
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 rounded-md border-2 bg-surface p-4 transition-colors duration-150 ease-out",
-        active ? "border-coral shadow-md" : "border-transparent",
+        "flex flex-col gap-2 rounded-md border-2 bg-surface p-4 shadow-sm transition-colors duration-150 ease-out",
+        active ? "border-coral shadow-md" : "border-edge",
       )}
     >
       <div className="flex items-start justify-between gap-3">

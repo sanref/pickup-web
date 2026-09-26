@@ -74,7 +74,7 @@ export function SlotPollGrid(props: Props) {
   const leadingCell = (slotId: string) => slotId === leadingSlotId && "bg-coral-050";
 
   return (
-    <div className="overflow-hidden rounded-lg bg-surface shadow-md">
+    <div className="overflow-hidden rounded-lg border border-edge bg-surface shadow-md">
       {/* Matriz: desde 700px */}
       <div className="hidden overflow-x-auto min-[700px]:block">
         <div className="grid" style={columns} role="table" aria-label="Votación de horarios">
@@ -137,7 +137,7 @@ export function SlotPollGrid(props: Props) {
           ];
           const voted = !!me?.slotIds.has(slot.id);
           return (
-            <li key={slot.id} className={cn("flex flex-col gap-3 rounded-sm p-4", leading ? "bg-coral-050" : "bg-page")}>
+            <li key={slot.id} className={cn("flex flex-col gap-3 rounded-sm p-4", leading ? "border border-coral-100 bg-coral-050" : "border border-border-inset bg-inset")}>
               <div className="flex items-center justify-between gap-3">
                 <div className="flex flex-col">
                   <span className={cn("text-xs font-semibold", leading ? "text-coral-700" : "text-text-3")}>

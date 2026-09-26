@@ -162,7 +162,7 @@ export function MatchMap({
   }, [ready, pins, activeId]);
 
   return (
-    <div className={cn("relative overflow-hidden rounded-lg bg-map shadow-md", className)}>
+    <div className={cn("relative overflow-hidden rounded-lg border border-edge bg-map shadow-sm", className)}>
       <div ref={container} className="absolute inset-0" />
       {failed && (
         <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-text-3">

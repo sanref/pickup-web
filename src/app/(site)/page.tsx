@@ -54,7 +54,7 @@ function FeaturedCard({ match }: { match: MatchSearchResult }) {
   return (
     <Link
       href={`/partidos/${match.id}`}
-      className="absolute right-5 -bottom-[26px] flex w-[290px] flex-col gap-2.5 rounded-md bg-surface px-5 py-[18px] text-text no-underline shadow-lg"
+      className="absolute right-5 -bottom-[26px] flex w-[290px] flex-col gap-2.5 rounded-md border border-edge bg-surface px-5 py-[18px] text-text no-underline shadow-lg"
     >
       <div className="flex items-center gap-2.5">
         <SportMonogram sport={match.sport} className="size-10 text-sm" />
@@ -105,7 +105,7 @@ export default async function HomePage() {
           <HomeSearch sports={sports.map(({ slug, name }) => ({ slug, name }))} />
           <nav aria-label="Deportes" className="flex flex-wrap gap-2">
             {sports.slice(0, 4).map((s) => (
-              <Link key={s.slug} href={exploreHref({ ...DEFAULT_FILTERS, sport: s.slug })} className={cn(tagLink, "bg-neutral-200 text-text-2 hover:bg-neutral-300")}>
+              <Link key={s.slug} href={exploreHref({ ...DEFAULT_FILTERS, sport: s.slug })} className={cn(tagLink, "tag-neutral hover:bg-neutral-300")}>
                 {s.name}
               </Link>
             ))}
@@ -121,7 +121,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-5 bg-surface-alt px-4 pt-6 pb-10 min-[900px]:px-10 min-[900px]:pt-12">
+      <section className="flex flex-col gap-5 bg-band px-4 pt-6 pb-10 min-[900px]:px-10 min-[900px]:pt-12">
         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
           <h2 className="m-0 text-[28px] tracking-[-0.02em]">{thisWeek ? "Cerca tuyo, esta semana" : "Próximos partidos"}</h2>
           {nearby.total > 0 && (
@@ -141,7 +141,7 @@ export default async function HomePage() {
             ))}
           </ul>
         ) : (
-          <div className="flex flex-col items-start gap-3 rounded-lg bg-surface p-8">
+          <div className="flex flex-col items-start gap-3 rounded-lg border border-edge bg-surface p-8 shadow-sm">
             <span className="text-2xl font-bold tracking-[-0.02em]">Todavía no hay partidos con lugar</span>
             <span className="text-sm text-text-2">Armá el primero: elegí la cancha, proponé dos o tres horarios y compartilo.</span>
             <Button asChild>

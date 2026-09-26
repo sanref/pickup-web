@@ -5,8 +5,8 @@ export const metadata = { title: "No encontrado" };
 
 export default function NotFound() {
   return (
-    <main className="flex flex-1 items-center justify-center bg-surface px-4 py-16">
-      <div className="flex w-full max-w-[460px] flex-col items-start gap-[18px] rounded-lg bg-background px-6 py-8 shadow-lg sm:px-[34px] sm:py-9">
+    <main className="flex flex-1 items-center justify-center px-4 py-16">
+      <div className="flex w-full max-w-[460px] flex-col items-start gap-[18px] rounded-lg border border-edge bg-surface px-6 py-8 shadow-xl sm:px-[34px] sm:py-9">
         <Link href="/" className="font-display text-[23px] leading-none text-text no-underline">
           PickUp
         </Link>

@@ -78,7 +78,7 @@ export function ManagePanel({ matchId, status, capacity, timezone, autoConfirm, 
             {slots.map((slot) => {
               const votes = slot.voters.length;
               return (
-                <li key={slot.id} className="flex flex-col gap-3 rounded-md bg-surface p-4">
+                <li key={slot.id} className="flex flex-col gap-3 rounded-md border border-edge bg-surface p-4 shadow-sm">
                   <div className="flex items-baseline justify-between gap-3">
                     <div className="flex flex-col">
                       <span className="text-xs font-semibold text-text-3">{formatSlotDay(slot.startsAt, timezone)}</span>
@@ -97,7 +97,7 @@ export function ManagePanel({ matchId, status, capacity, timezone, autoConfirm, 
             })}
           </ul>
 
-          <div className="flex flex-col gap-2 rounded-md bg-surface p-4">
+          <div className="flex flex-col gap-2 rounded-md border border-edge bg-surface p-4 shadow-sm">
             <span className="text-sm font-semibold">Cuando una opción llegue al cupo</span>
             <Segmented
               name="auto-confirm"
@@ -120,7 +120,7 @@ export function ManagePanel({ matchId, status, capacity, timezone, autoConfirm, 
 
       <section className="flex flex-col gap-3.5">
         <h2 className="m-0 text-[21px] tracking-[-0.02em]">Anotados · {participants.length}</h2>
-        <ul className="m-0 flex list-none flex-col divide-y divide-neutral-200 rounded-md bg-surface p-0 px-4">
+        <ul className="m-0 flex list-none flex-col divide-y divide-neutral-200 rounded-md border border-edge bg-surface p-0 px-4 shadow-sm">
           {participants.map((p) => (
             <li key={p.userId} className="flex items-center gap-3 py-3">
               <UserAvatar name={p.displayName} src={p.avatarUrl} className="size-[30px]" textClassName="text-[11px]" />

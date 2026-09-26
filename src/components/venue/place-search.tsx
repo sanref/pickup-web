@@ -93,7 +93,7 @@ export function PlaceSearch({ onPick, center = DEFAULT_CENTER }: { onPick: (plac
         <ul
           id={listId}
           role="listbox"
-          className="absolute top-full z-20 m-0 mt-1.5 flex w-full list-none flex-col overflow-hidden rounded-md bg-background p-1.5 shadow-lg"
+          className="absolute top-full z-20 m-0 mt-1.5 flex w-full list-none flex-col overflow-hidden rounded-md border border-edge bg-surface p-1.5 shadow-lg"
         >
           {suggestions.map((s, i) => (
             <li

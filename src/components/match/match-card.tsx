@@ -50,7 +50,7 @@ export function SportMonogram({ sport, className }: { sport: MatchSearchResult["
       aria-hidden
       className={cn(
         "grid size-9 shrink-0 place-items-center rounded-full text-[13px] font-semibold",
-        sport.id % 2 ? "bg-coral-100 text-navy" : "bg-neutral-200 text-text-2",
+        sport.id % 2 ? "bg-coral-100 text-navy" : "tag-neutral",
         className,
       )}
     >
@@ -71,8 +71,8 @@ export function MatchCard({ match, active = false }: { match: MatchSearchResult;
   return (
     <div
       className={cn(
-        "grid grid-cols-[auto_1fr] items-center gap-y-3 rounded-md border-2 bg-surface p-4 transition-colors duration-150 ease-out sm:grid-cols-[auto_1fr_auto] sm:p-[18px]",
-        active ? "border-coral shadow-md" : "border-transparent",
+        "grid grid-cols-[auto_1fr] items-center gap-y-3 rounded-md border-2 bg-surface p-4 shadow-sm transition-colors duration-150 ease-out sm:grid-cols-[auto_1fr_auto] sm:p-[18px]",
+        active ? "border-coral shadow-md" : "border-edge",
       )}
     >
       <div className="flex w-[74px] flex-col items-center justify-center border-r border-border pr-4">
@@ -114,7 +114,7 @@ export function MatchCard({ match, active = false }: { match: MatchSearchResult;
 export function MatchTile({ match }: { match: MatchSearchResult }) {
   const price = formatPrice(match.pricePerPerson);
   return (
-    <div className="flex h-full flex-col gap-3 rounded-md bg-surface p-5 transition-shadow duration-150 ease-out hover:shadow-md">
+    <div className="flex h-full flex-col gap-3 rounded-md border border-edge bg-surface p-5 shadow-sm transition-shadow duration-150 ease-out hover:shadow-md">
       <div className="flex items-center gap-2.5">
         <SportMonogram sport={match.sport} />
         <StatusTag status={match.status} />

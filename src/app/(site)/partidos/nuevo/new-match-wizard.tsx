@@ -136,7 +136,7 @@ export function NewMatchWizard({
   return (
     <form
       onSubmit={next}
-      className="mx-auto flex w-full max-w-[720px] flex-col gap-5 rounded-lg bg-background px-5 py-7 shadow-lg sm:p-[34px]"
+      className="mx-auto flex w-full max-w-[720px] flex-col gap-5 rounded-lg border border-edge bg-surface px-5 py-7 shadow-xl sm:p-[34px]"
     >
       <div className="flex gap-1.5" role="progressbar" aria-label={`Paso ${step + 1} de ${STEPS.length}`} aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1}>
         {STEPS.map((s, i) => (
@@ -163,7 +163,7 @@ export function NewMatchWizard({
                 onClick={() => chooseSport(s)}
                 className={cn(
                   "min-h-11 rounded-full px-4 text-sm transition-colors duration-150",
-                  on ? "bg-coral text-navy" : "bg-surface text-text-2 hover:bg-neutral-200",
+                  on ? "bg-coral text-navy" : "tag-neutral hover:bg-neutral-300",
                 )}
               >
                 {s.name}
@@ -178,7 +178,7 @@ export function NewMatchWizard({
       {step === 2 && (
         <div className="flex flex-col gap-3">
           {draft.slots.map((slot, i) => (
-            <div key={i} className="flex flex-wrap items-end gap-3 rounded-md bg-surface p-3.5">
+            <div key={i} className="flex flex-wrap items-end gap-3 rounded-sm border border-border-inset bg-inset p-3.5">
               <Field id={`date-${i}`} label="Fecha">
                 <Input
                   id={`date-${i}`}

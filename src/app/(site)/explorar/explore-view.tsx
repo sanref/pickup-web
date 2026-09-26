@@ -149,7 +149,7 @@ export function ExploreView({
             )}
           </ul>
         ) : (
-          <div aria-busy={pending} className={cn("flex flex-col items-start gap-3 rounded-lg bg-surface p-8", pending && "opacity-60")}>
+          <div aria-busy={pending} className={cn("flex flex-col items-start gap-3 rounded-lg border border-edge bg-surface p-8 shadow-sm", pending && "opacity-60")}>
             <span className="text-2xl font-bold tracking-[-0.02em]">No hay partidos con lugar por acá</span>
             <span className="text-sm text-text-2">
               {current.km < RADIUS_KM.max ? "Probá ampliar la distancia o cambiar los filtros. " : "Probá cambiar los filtros. "}

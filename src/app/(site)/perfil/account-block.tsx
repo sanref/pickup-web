@@ -35,7 +35,7 @@ export function AccountBlock({
   return (
     <section className="flex flex-col gap-4">
       <h2 className="m-0 text-[21px] tracking-[-0.02em]">Cuenta</h2>
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-surface px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-sm border border-border-inset bg-inset px-4 py-3">
         <div className="flex flex-col gap-0.5">
           <span className="text-sm font-semibold">{email}</span>
           <span className="text-xs text-text-3">{status}</span>

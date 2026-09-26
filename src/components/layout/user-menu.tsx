@@ -31,7 +31,7 @@ export function UserMenu({
       >
         <UserAvatar name={name} src={avatarUrl} className="size-11 sm:size-10" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 rounded-md bg-background p-1.5 shadow-md">
+      <DropdownMenuContent align="end" className="w-56 rounded-md bg-surface p-1.5 shadow-md">
         <DropdownMenuLabel className="flex flex-col gap-0.5 font-normal">
           <span className="text-sm font-semibold text-text">{name}</span>
           <span className="truncate text-xs text-text-3">{email}</span>

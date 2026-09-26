@@ -31,6 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${graduate.variable} ${grotesk.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        <div aria-hidden className="app-backdrop" />
         {children}
         <Toaster />
       </body>

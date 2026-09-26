@@ -125,7 +125,7 @@ export function ZonePicker({
         <ul
           id={listId}
           role="listbox"
-          className="absolute top-full left-0 z-30 m-0 mt-2 flex w-[max(100%,280px)] list-none flex-col overflow-hidden rounded-md bg-background p-1.5 shadow-lg"
+          className="absolute top-full left-0 z-30 m-0 mt-2 flex w-[max(100%,280px)] list-none flex-col overflow-hidden rounded-md border border-edge bg-surface p-1.5 shadow-lg"
         >
           <li
             id={`${listId}-0`}

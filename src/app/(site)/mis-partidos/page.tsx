@@ -67,15 +67,16 @@ function MatchRow({ m, tone }: { m: MyMatch; tone: Tone }) {
   return (
     <li
       className={cn(
-        "flex flex-col gap-4 rounded-md bg-surface p-5 sm:flex-row sm:items-center",
-        tone === "confirmed" && "border-l-[6px] border-navy shadow-sm",
-        needsYou && "border-l-[6px] border-coral shadow-sm",
+        "flex flex-col gap-4 rounded-md border border-edge bg-surface p-5 shadow-sm sm:flex-row sm:items-center",
+        tone === "confirmed" && "border-l-[6px] border-l-navy",
+        needsYou && "border-l-[6px] border-l-coral",
         tone === "past" && "opacity-80",
       )}
     >
-      <div className="flex w-[92px] shrink-0 flex-col">
+      {/* 120px: la columna también aloja rangos ("24 al 26") y todas las filas comparten ancho para alinear los títulos. */}
+      <div className="flex w-[120px] shrink-0 flex-col">
         <span className="text-xs font-semibold text-text-3">{top}</span>
-        <span className="font-display text-[25px] leading-[1.1] tabular">{main}</span>
+        <span className="font-display text-[25px] leading-[1.1] whitespace-nowrap tabular">{main}</span>
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <div className="flex flex-wrap items-center gap-2">
@@ -116,7 +117,7 @@ function Group({ label, items, tone }: { label: string; items: MyMatch[]; tone: 
 
 function Empty({ title, text }: { title: string; text: string }) {
   return (
-    <div className="flex flex-col items-start gap-3 rounded-lg bg-surface p-8">
+    <div className="flex flex-col items-start gap-3 rounded-lg border border-edge bg-surface p-8 shadow-sm">
       <span className="text-2xl font-bold tracking-[-0.02em]">{title}</span>
       <span className="text-sm text-text-2">{text}</span>
       <div className="flex flex-wrap gap-2.5">
@@ -160,14 +161,14 @@ export default async function MyMatchesPage({ searchParams }: PageProps<"/mis-pa
     <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-6 px-4 pt-7 pb-11 min-[900px]:px-10">
       <div className="flex flex-wrap items-center gap-4">
         <h1 className="m-0 text-[34px] leading-tight tracking-[-0.03em]">Mis partidos</h1>
-        <nav aria-label="Filtrar partidos" className="inline-flex overflow-hidden rounded-full border border-border-input bg-surface sm:ml-auto">
+        <nav aria-label="Filtrar partidos" className="inline-flex overflow-hidden rounded-full border border-edge bg-surface shadow-xs sm:ml-auto">
           {tabs.map((t) => (
             <Link
               key={t.id}
               href={`/mis-partidos?tab=${t.id}`}
               aria-current={t.id === tab ? "page" : undefined}
               className={cn(
-                "inline-flex min-h-11 items-center px-3.5 text-[13px] no-underline transition-colors duration-150 sm:min-h-0 sm:py-[7px] [&+&]:border-l [&+&]:border-border-input",
+                "inline-flex min-h-11 items-center px-3.5 text-[13px] no-underline transition-colors duration-150 sm:min-h-0 sm:py-[7px] [&+&]:border-l [&+&]:border-border",
                 t.id === tab ? "bg-navy font-semibold text-surface" : "text-text-2 hover:bg-navy/6",
               )}
             >

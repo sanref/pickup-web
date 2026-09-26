@@ -56,7 +56,7 @@ export default async function VenuesPage({ searchParams }: PageProps<"/sedes">) 
               aria-current={on ? "page" : undefined}
               className={cn(
                 "inline-flex min-h-11 items-center rounded-full px-3.5 text-[13px] no-underline transition-colors duration-150 sm:min-h-9",
-                on ? "bg-coral-100 text-navy" : "bg-surface text-text-2 hover:bg-neutral-200",
+                on ? "bg-coral-100 text-navy" : "tag-neutral hover:bg-neutral-300",
               )}
             >
               {s.name}
@@ -68,7 +68,7 @@ export default async function VenuesPage({ searchParams }: PageProps<"/sedes">) 
       {venues.length > 0 ? (
         <VenueBrowser venues={venues} />
       ) : (
-        <div className="flex flex-col items-start gap-3 rounded-lg bg-surface p-8">
+        <div className="flex flex-col items-start gap-3 rounded-lg border border-edge bg-surface p-8 shadow-sm">
           <span className="text-2xl font-bold tracking-[-0.02em]">No encontramos sedes</span>
           <span className="text-sm text-text-2">Probá con otro nombre o proponé la cancha donde jugás.</span>
           <div className="flex flex-wrap gap-2.5">

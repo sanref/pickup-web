@@ -28,7 +28,7 @@ function FilterTag({ on, tone, onClick, children }: { on: boolean; tone: "coral"
           ? tone === "coral"
             ? "bg-coral font-semibold text-navy"
             : "bg-navy font-semibold text-surface"
-          : "bg-neutral-200 text-text-2 hover:bg-neutral-300",
+          : "tag-neutral hover:bg-neutral-300",
       )}
     >
       {children}

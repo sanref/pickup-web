@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
 import { Slot } from "radix-ui"
 
-// Tags v2: píldora de 11-12px. coral = empuja a actuar ("faltan 3"),
+// Tags v3: píldora de 11-12px. coral = empuja a actuar ("faltan 3"),
 // navy = estructura y estados ya resueltos, neutral = informativo, outline = cancelado.
 const badgeVariants = cva(
   "inline-flex w-fit shrink-0 items-center justify-center gap-1 rounded-full border border-transparent px-2.5 py-[3px] text-[11px] leading-normal whitespace-nowrap [&>svg]:pointer-events-none [&>svg]:size-3!",
@@ -13,7 +13,7 @@ const badgeVariants = cva(
         coral: "bg-coral font-semibold text-navy",
         "coral-soft": "bg-coral-100 text-navy",
         navy: "bg-navy text-navy-200",
-        neutral: "bg-neutral-200 text-text-3",
+        neutral: "tag-neutral",
         outline: "border-border-input text-text-3",
       },
     },

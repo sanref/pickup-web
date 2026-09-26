@@ -3,8 +3,10 @@
 @import "shadcn/tailwind.css";
 
 /*
- * Sistema de diseño PickUp v2.
- * Los valores salen literalmente de _handoff/v2/README.md (tabla de tokens).
+ * Sistema de diseño PickUp v3.
+ * Los valores salen literalmente de _handoff/v3/README.md (tokens + "Fondo y contraste").
+ * v3 = v2 sobre un fondo marca de agua: toda superficie es blanca y lleva borde `edge`,
+ * que es lo que la separa de la ilustración de fondo.
  * Coral = lo que empuja a actuar. Navy = la estructura y lo ya resuelto. No mezclarlos.
  * Para estados derivados (hover translúcido, presionado) usar color-mix() sobre un token,
  * no inventar hex nuevos.
@@ -24,15 +26,25 @@
   --color-coral-050: #fff4f1;
   --color-coral-700: #b03a1e;
 
-  /* Superficies. */
-  --color-page: #edefec;
-  --color-surface: #f8f9f7;
+  /* Superficies. `page` es el color base bajo la marca de agua. */
+  --color-page: #f4f5f3;
+  --color-surface: #ffffff;
   --color-surface-alt: #e7eae6;
+  /* Franja sobre el fondo ("cerca tuyo"): translúcida para que se vea la marca de agua. */
+  --color-band: rgb(223 228 224 / 0.72);
+  /* Filas internas dentro de una tarjeta blanca (deportes del perfil). */
+  --color-inset: #f1f3f1;
+  --color-border-inset: #dde2de;
+  /* Tags neutros: fondo, texto y borde interno de 1px. */
+  --color-tag: #e3e7e4;
+  --color-tag-foreground: #2b3745;
+  --color-tag-ring: #cbd2cd;
   --color-neutral-200: #dfe3e0;
   --color-neutral-300: #cfd5d0;
   --color-map: #d7ddd8;
 
-  /* Líneas. */
+  /* Líneas. `edge` es el borde obligatorio de toda superficie apoyada sobre el fondo. */
+  --color-edge: #cfd6d1;
   --color-border: #e3e6e1;
   --color-border-input: #c3cad3;
 
@@ -48,10 +60,13 @@
   --radius-md: 20px;
   --radius-lg: 22px;
 
-  /* Elevación. */
-  --shadow-sm: 0 1px 3px rgba(18, 37, 68, 0.12);
-  --shadow-md: 0 2px 10px rgba(18, 37, 68, 0.12);
+  /* Elevación: xs controles (segmented, filtros), sm tarjetas, md grilla y búsqueda,
+     lg tarjeta flotante del hero, xl tarjetas de login/onboarding y diálogos. */
+  --shadow-xs: 0 1px 2px rgba(18, 37, 68, 0.1);
+  --shadow-sm: 0 1px 2px rgba(18, 37, 68, 0.1), 0 6px 18px rgba(18, 37, 68, 0.1);
+  --shadow-md: 0 1px 2px rgba(18, 37, 68, 0.1), 0 8px 24px rgba(18, 37, 68, 0.14);
   --shadow-lg: 0 8px 24px rgba(18, 37, 68, 0.2);
+  --shadow-xl: 0 12px 36px rgba(18, 37, 68, 0.16);
 }
 
 @theme inline {
@@ -80,11 +95,11 @@
 }
 
 :root {
-  --background: #edefec;
+  --background: #f4f5f3;
   --foreground: #16202e;
-  --card: #f8f9f7;
+  --card: #ffffff;
   --card-foreground: #16202e;
-  --popover: #f8f9f7;
+  --popover: #ffffff;
   --popover-foreground: #16202e;
   /* Sobre coral el texto va en navy. */
   --primary: #ff6b4a;
@@ -115,6 +130,16 @@
     @apply bg-background text-foreground;
     font-size: 15px;
     line-height: 1.5;
+  }
+
+  /* Fondo marca de agua (ilustración de deportes), fijo mientras el contenido scrollea.
+     Va en un elemento fijo y no con background-attachment: fixed porque iOS lo ignora. */
+  .app-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: var(--color-page) url(/fondo-deportes.jpg) center / cover no-repeat;
+    pointer-events: none;
   }
 
   /* Los títulos van en Familjen Grotesk con peso y tracking por tamaño
@@ -162,6 +187,13 @@
   .lucide {
     stroke-width: 2;
   }
+}
+
+/* Tag neutro v3: el borde interno lo despega de la marca de agua y de las tarjetas blancas. */
+@utility tag-neutral {
+  background-color: var(--color-tag);
+  color: var(--color-tag-foreground);
+  box-shadow: inset 0 0 0 1px var(--color-tag-ring);
 }
 
 @layer utilities {

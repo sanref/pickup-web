@@ -27,7 +27,7 @@ export function MatchRoster({ participants, capacity, viewerId }: { participants
   const interested = participants.filter((p) => p.status === "interested");
 
   return (
-    <div className="grid gap-5 rounded-lg bg-surface p-5 shadow-sm sm:grid-cols-2">
+    <div className="grid gap-5 rounded-lg border border-edge bg-surface p-5 shadow-sm sm:grid-cols-2">
       <section className="flex flex-col gap-2">
         <span className="text-[13px] font-semibold text-text-3">
           Confirmados · {confirmed.length} de {capacity}

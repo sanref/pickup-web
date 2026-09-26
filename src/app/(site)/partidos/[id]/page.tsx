@@ -72,7 +72,7 @@ export default async function MatchPage({ params, searchParams }: PageProps<"/pa
 
   const sidebar = (
     <>
-      <div className="flex flex-col overflow-hidden rounded-md bg-surface">
+      <div className="flex flex-col overflow-hidden rounded-md border border-edge bg-surface shadow-sm">
         <VenueMap
           pins={[{ id: match.venue.id, lat: match.venue.location.lat, lng: match.venue.location.lng, label: match.venue.name }]}
           activeId={match.venue.id}
@@ -91,7 +91,7 @@ export default async function MatchPage({ params, searchParams }: PageProps<"/pa
         </div>
       </div>
 
-      <div className="flex flex-col gap-2.5 rounded-md bg-surface p-[18px]">
+      <div className="flex flex-col gap-2.5 rounded-md border border-edge bg-surface p-[18px] shadow-sm">
         <span className="text-[13px] font-semibold text-text-3">Datos del partido</span>
         <DataRow label="Precio" value={match.pricePerPerson == null ? "A definir" : match.pricePerPerson === 0 ? "Gratis" : `${money.format(match.pricePerPerson)} p/p`} />
         <DataRow label="Nivel" value={levelLabel ?? "Cualquiera"} />

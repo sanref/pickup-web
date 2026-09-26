@@ -48,7 +48,7 @@ export function HomeSearch({ sports }: { sports: { slug: string; name: string }[
     <form
       role="search"
       onSubmit={submit}
-      className="flex max-w-[560px] flex-col gap-3 rounded-md bg-surface p-4 shadow-md min-[640px]:flex-row min-[640px]:items-center min-[640px]:gap-2.5 min-[640px]:rounded-full min-[640px]:py-2 min-[640px]:pr-2 min-[640px]:pl-[22px]"
+      className="flex max-w-[560px] flex-col gap-3 rounded-md border border-edge bg-surface p-4 shadow-md min-[640px]:flex-row min-[640px]:items-center min-[640px]:gap-2.5 min-[640px]:rounded-full min-[640px]:py-2 min-[640px]:pr-2 min-[640px]:pl-[22px]"
     >
       <Field label="Deporte" htmlFor={ids.sport}>
         <select id={ids.sport} value={sport} onChange={(e) => setSport(e.target.value)} className={selectClass}>

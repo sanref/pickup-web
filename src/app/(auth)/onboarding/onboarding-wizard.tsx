@@ -49,7 +49,7 @@ export function OnboardingWizard({ sports, initial, next }: { sports: SportOptio
   return (
     <form
       onSubmit={onSubmit}
-      className="flex w-full max-w-[620px] flex-col gap-5 rounded-lg bg-background px-6 py-8 shadow-lg sm:p-[34px]"
+      className="flex w-full max-w-[620px] flex-col gap-5 rounded-lg border border-edge bg-surface px-6 py-8 shadow-xl sm:p-[34px]"
     >
       <div className="flex gap-1.5" aria-label={`Paso ${step + 1} de ${STEPS.length}`} role="progressbar" aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1}>
         {STEPS.map((s, i) => (
