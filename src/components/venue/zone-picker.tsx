@@ -4,6 +4,7 @@ import { LocateFixed, MapPin } from "lucide-react";
 import { useId, useState } from "react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import { locateUser } from "@/lib/user-location";
 import { cn } from "@/lib/utils";
 import { usePlaceSuggestions } from "./use-place-suggestions";
 
@@ -11,18 +12,10 @@ export type Zone = { label: string; lat: number; lng: number };
 
 const MY_LOCATION_LABEL = "tu ubicación";
 
-// Con dos decimales (~1 km) alcanza para buscar cerca y la ubicación exacta no queda en el link.
-const coarse = (n: number) => Math.round(n * 100) / 100;
-
-function locate(): Promise<Zone> {
-  return new Promise((resolve, reject) => {
-    if (!("geolocation" in navigator)) return reject(new Error("Sin geolocalización"));
-    navigator.geolocation.getCurrentPosition(
-      (pos) => resolve({ label: MY_LOCATION_LABEL, lat: coarse(pos.coords.latitude), lng: coarse(pos.coords.longitude) }),
-      reject,
-      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 10 * 60_000 },
-    );
-  });
+// También recuerda la ubicación en la cookie, así el resto del sitio arranca en su ciudad.
+async function locate(): Promise<Zone> {
+  const { center, city } = await locateUser();
+  return { label: city ?? MY_LOCATION_LABEL, ...center };
 }
 
 // Zona de búsqueda: "Usar mi ubicación" o un barrio / dirección de Google Maps.

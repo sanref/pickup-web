@@ -3,6 +3,7 @@ import { DEFAULT_CENTER } from "@/lib/geo";
 import { parseExploreParams } from "@/lib/validations/search";
 import { getActor } from "@/server/auth/session";
 import { listActiveSports } from "@/server/services/profiles";
+import { getSavedLocation } from "@/server/location";
 import { searchMatches } from "@/server/services/search";
 import { ExploreView } from "./explore-view";
 
@@ -12,8 +13,10 @@ export const metadata: Metadata = {
 };
 
 export default async function ExplorePage({ searchParams }: PageProps<"/explorar">) {
-  const filters = parseExploreParams(await searchParams);
-  const [actor, sports] = await Promise.all([getActor(), listActiveSports()]);
+  const parsed = parseExploreParams(await searchParams);
+  const [actor, sports, { location }] = await Promise.all([getActor(), listActiveSports(), getSavedLocation()]);
+  // Sin zona en la URL se usa la ubicación recordada del usuario (si la dio).
+  const filters = parsed.center || !location ? parsed : { ...parsed, center: location.center, zone: location.city ?? "tu ubicación" };
   const sport = sports.find((s) => s.slug === filters.sport);
   const { total, matches } = await searchMatches(actor, {
     center: filters.center ?? DEFAULT_CENTER,

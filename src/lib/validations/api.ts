@@ -23,7 +23,8 @@ export const searchMatchesQuerySchema = z
     limit: z.coerce.number().int().min(1).max(60).default(60),
   })
   .refine((q) => (q.lat == null) === (q.lng == null), "Mandá lat y lng juntas.");
-export type SearchMatchesQuery = z.input<typeof searchMatchesQuerySchema>;
+// Lo que manda el cliente: todo opcional (el servidor completa los valores por defecto).
+export type SearchMatchesQuery = Partial<z.output<typeof searchMatchesQuerySchema>>;
 
 // GET /api/v1/venues
 export const searchVenuesQuerySchema = z
@@ -35,7 +36,7 @@ export const searchVenuesQuerySchema = z
     limit: z.coerce.number().int().min(1).max(60).default(30),
   })
   .refine((q) => (q.lat == null) === (q.lng == null), "Mandá lat y lng juntas.");
-export type SearchVenuesQuery = z.input<typeof searchVenuesQuerySchema>;
+export type SearchVenuesQuery = Partial<z.output<typeof searchVenuesQuerySchema>>;
 
 // GET /api/v1/matches/:id?invite=
 export const matchDetailQuerySchema = z.object({ invite: invite.optional() });
@@ -58,3 +59,15 @@ export type ConfirmSlotBody = z.infer<typeof confirmSlotBodySchema>;
 // PUT /api/v1/matches/:id/auto-confirm
 export const autoConfirmBodySchema = z.object({ value: z.boolean() });
 export type AutoConfirmBody = z.infer<typeof autoConfirmBodySchema>;
+
+// Sesión de autocompletado de Google Places: la genera el cliente y la reutiliza hasta elegir un lugar.
+const placesSession = z.string().regex(/^[A-Za-z0-9_-]{8,64}$/, "Sesión inválida.");
+
+// GET /api/v1/places/autocomplete
+export const placesAutocompleteQuerySchema = z
+  .object({ q: z.string().trim().min(3).max(120), lat: lat.optional(), lng: lng.optional(), session: placesSession })
+  .refine((q) => (q.lat == null) === (q.lng == null), "Mandá lat y lng juntas.");
+export type PlacesAutocompleteQuery = z.output<typeof placesAutocompleteQuerySchema>;
+
+// GET /api/v1/places/:placeId
+export const placeDetailQuerySchema = z.object({ session: placesSession });

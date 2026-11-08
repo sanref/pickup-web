@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { z } from "zod";
 import type { ApiErrorBody, ApiErrorCode } from "@/lib/api/contract";
 import { UserError } from "@/server/errors";
+import { PlacesUnavailableError } from "@/server/services/places";
 
 // Infraestructura común de los route handlers de /api/v1 (la API que consume la app mobile).
 // Respuestas: { data } si sale bien, { error: { code, message, issues? } } si no. `message` es apto
@@ -42,6 +43,10 @@ export function toErrorResponse(error: unknown): Response {
   }
   // Regla de negocio (votación cerrada, sin lugar, no sos el organizador…): el mensaje ya es para el usuario.
   if (error instanceof UserError) return errorResponse(422, { code: "rejected", message: error.message });
+  if (error instanceof PlacesUnavailableError) {
+    console.error("[api/v1]", error.message);
+    return errorResponse(503, { code: "unavailable", message: "La búsqueda en Google Maps no está disponible todavía." });
+  }
   console.error("[api/v1]", error);
   return errorResponse(500, { code: "internal", message: "Algo salió mal. Probá de nuevo." });
 }

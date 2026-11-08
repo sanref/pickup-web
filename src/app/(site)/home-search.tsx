@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ZonePicker, type Zone } from "@/components/venue/zone-picker";
-import { DEFAULT_ZONE_LABEL } from "@/lib/geo";
 import { DEFAULT_FILTERS, WHEN_OPTIONS, exploreHref, type When } from "@/lib/validations/search";
 
 function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
@@ -24,7 +23,7 @@ const Divider = () => <span aria-hidden className="hidden h-8 w-px shrink-0 bg-b
 const selectClass = "w-full cursor-pointer appearance-none bg-transparent text-[15px] font-semibold text-text";
 
 // Buscador del hero (Deporte / Zona / Cuándo): lleva a /explorar con esos filtros.
-export function HomeSearch({ sports }: { sports: { slug: string; name: string }[] }) {
+export function HomeSearch({ sports, defaultZone }: { sports: { slug: string; name: string }[]; defaultZone: string }) {
   const router = useRouter();
   const ids = { sport: useId(), zone: useId(), when: useId() };
   const [sport, setSport] = useState("");
@@ -62,7 +61,7 @@ export function HomeSearch({ sports }: { sports: { slug: string; name: string }[
       </Field>
       <Divider />
       <Field label="Zona" htmlFor={ids.zone}>
-        <ZonePicker id={ids.zone} variant="bare" current={zone?.label ?? DEFAULT_ZONE_LABEL} onPick={setZone} />
+        <ZonePicker id={ids.zone} variant="bare" current={zone?.label ?? defaultZone} onPick={setZone} />
       </Field>
       <Divider />
       <Field label="Cuándo" htmlFor={ids.when}>

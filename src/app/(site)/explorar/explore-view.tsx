@@ -92,89 +92,98 @@ export function ExploreView({
   const filtersPanel = <ExploreFiltersPanel filters={current} sports={sports} zone={zone} onChange={(patch) => update(patch)} />;
 
   return (
-    <div className="mx-auto grid w-full max-w-[1400px] items-start gap-[26px] px-4 pt-4 pb-11 min-[900px]:grid-cols-[minmax(0,1fr)_auto] min-[900px]:px-10 min-[900px]:pt-[26px] min-[1200px]:grid-cols-[230px_minmax(0,1fr)_auto]">
-      <aside aria-label="Filtros" className="sticky top-(--site-header-h) hidden pt-4 min-[1200px]:block">
-        {filtersPanel}
-      </aside>
-
-      <section className={cn("min-w-0 flex-col gap-3.5", view === "mapa" ? "hidden min-[900px]:flex" : "flex")}>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <div className="flex min-w-0 flex-col">
-            <h1 className="m-0 text-[26px] leading-tight tracking-[-0.02em]">
-              {total} {total === 1 ? "partido con lugar" : "partidos con lugar"}
-            </h1>
-            <span className="text-[13px] text-text-3">
-              A menos de {current.km} km de {zone}
-            </span>
-          </div>
-          <label className="ml-auto flex items-center gap-1 text-[13px] text-text-3">
-            Ordenar por:
-            <select
-              value={current.sort}
-              onChange={(e) => update({ sort: e.target.value as Sort }, "replace")}
-              className="cursor-pointer rounded-full bg-transparent py-1 font-semibold text-text"
-            >
-              {SORT_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        <MobileBar activeFilters={activeFilters} view={view} onView={setView} onOpenFilters={() => setFiltersOpen(true)} />
-
-        {matches.length > 0 ? (
-          <ul aria-busy={pending} className={cn("m-0 flex list-none flex-col gap-3.5 p-0 transition-opacity duration-150", pending && "opacity-60")}>
-            {matches.map((m) => (
-              <li
-                key={m.id}
-                ref={(el) => {
-                  if (el) cards.current.set(m.id, el);
-                  else cards.current.delete(m.id);
-                }}
-                onMouseEnter={() => setActiveId(m.id)}
-                onMouseLeave={() => setActiveId(null)}
-              >
-                <Link href={`/partidos/${m.id}`} onFocus={() => setActiveId(m.id)} className="block rounded-md text-text no-underline">
-                  <MatchCard match={m} active={m.id === activeId} />
-                </Link>
-              </li>
-            ))}
-            {total > matches.length && (
-              <li className="px-1 text-[13px] text-text-3">
-                Mostramos los {matches.length} {current.sort === "pronto" ? "más próximos" : "más cercanos"}. Filtrá por deporte o fecha para ver otros.
-              </li>
-            )}
-          </ul>
-        ) : (
-          <div aria-busy={pending} className={cn("flex flex-col items-start gap-3 rounded-lg border border-edge bg-surface p-8 shadow-sm", pending && "opacity-60")}>
-            <span className="text-2xl font-bold tracking-[-0.02em]">No hay partidos con lugar por acá</span>
-            <span className="text-sm text-text-2">
-              {current.km < RADIUS_KM.max ? "Probá ampliar la distancia o cambiar los filtros. " : "Probá cambiar los filtros. "}
-              O armá uno: con dos o tres horarios posibles se completa rápido.
-            </span>
-            <div className="flex flex-wrap gap-2.5">
-              {current.km < RADIUS_KM.max && (
-                <Button variant="outline" onClick={() => update({ km: widerKm })}>
-                  Ampliar a {widerKm} km
-                </Button>
-              )}
-              {isFiltered(current) && (
-                <Button variant="outline" onClick={() => update({ sport: null, when: "todas", level: null })}>
-                  Quitar filtros
-                </Button>
-              )}
-              <Button asChild>
-                <Link href="/partidos/nuevo">Crear partido</Link>
-              </Button>
-            </div>
-          </div>
+    // Desde 900px la pantalla se parte en dos: a la izquierda filtros + lista (con su propio scroll) y a la
+    // derecha el mapa, que ocupa todo el alto y el ancho que quedan. Debajo de 900px lista y mapa se alternan.
+    <div className="flex w-full flex-1 flex-col min-[900px]:h-[calc(100dvh-var(--site-header-h))] min-[900px]:flex-row min-[900px]:overflow-hidden">
+      <div
+        className={cn(
+          "min-w-0 gap-[26px] px-4 pt-4 pb-11 min-[900px]:w-[520px] min-[900px]:shrink-0 min-[900px]:overflow-y-auto min-[900px]:px-8 min-[900px]:pt-[26px] min-[1200px]:w-[800px]",
+          view === "mapa" ? "hidden min-[900px]:flex" : "flex",
         )}
-      </section>
+      >
+        <aside aria-label="Filtros" className="sticky top-0 hidden w-[230px] shrink-0 self-start pt-4 min-[1200px]:block">
+          {filtersPanel}
+        </aside>
 
-      <div className={cn("sticky top-(--site-header-h) flex-col gap-3 pt-4 min-[900px]:w-[400px]", view === "lista" ? "hidden min-[900px]:flex" : "flex")}>
+        <section className="flex min-w-0 flex-1 flex-col gap-3.5">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <div className="flex min-w-0 flex-col">
+              <h1 className="m-0 text-[26px] leading-tight tracking-[-0.02em]">
+                {total} {total === 1 ? "partido con lugar" : "partidos con lugar"}
+              </h1>
+              <span className="text-[13px] text-text-3">
+                A menos de {current.km} km de {zone}
+              </span>
+            </div>
+            <label className="ml-auto flex items-center gap-1 text-[13px] text-text-3">
+              Ordenar por:
+              <select
+                value={current.sort}
+                onChange={(e) => update({ sort: e.target.value as Sort }, "replace")}
+                className="cursor-pointer rounded-full bg-transparent py-1 font-semibold text-text"
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <MobileBar activeFilters={activeFilters} view={view} onView={setView} onOpenFilters={() => setFiltersOpen(true)} />
+
+          {matches.length > 0 ? (
+            <ul aria-busy={pending} className={cn("m-0 flex list-none flex-col gap-3.5 p-0 transition-opacity duration-150", pending && "opacity-60")}>
+              {matches.map((m) => (
+                <li
+                  key={m.id}
+                  ref={(el) => {
+                    if (el) cards.current.set(m.id, el);
+                    else cards.current.delete(m.id);
+                  }}
+                  onMouseEnter={() => setActiveId(m.id)}
+                  onMouseLeave={() => setActiveId(null)}
+                >
+                  <Link href={`/partidos/${m.id}`} onFocus={() => setActiveId(m.id)} className="block rounded-md text-text no-underline">
+                    <MatchCard match={m} active={m.id === activeId} />
+                  </Link>
+                </li>
+              ))}
+              {total > matches.length && (
+                <li className="px-1 text-[13px] text-text-3">
+                  Mostramos los {matches.length} {current.sort === "pronto" ? "más próximos" : "más cercanos"}. Filtrá por deporte o fecha para ver otros.
+                </li>
+              )}
+            </ul>
+          ) : (
+            <div aria-busy={pending} className={cn("flex flex-col items-start gap-3 rounded-lg border border-edge bg-surface p-8 shadow-sm", pending && "opacity-60")}>
+              <span className="text-2xl font-bold tracking-[-0.02em]">No hay partidos con lugar por acá</span>
+              <span className="text-sm text-text-2">
+                {current.km < RADIUS_KM.max ? "Probá ampliar la distancia o cambiar los filtros. " : "Probá cambiar los filtros. "}
+                O armá uno: con dos o tres horarios posibles se completa rápido.
+              </span>
+              <div className="flex flex-wrap gap-2.5">
+                {current.km < RADIUS_KM.max && (
+                  <Button variant="outline" onClick={() => update({ km: widerKm })}>
+                    Ampliar a {widerKm} km
+                  </Button>
+                )}
+                {isFiltered(current) && (
+                  <Button variant="outline" onClick={() => update({ sport: null, when: "todas", level: null })}>
+                    Quitar filtros
+                  </Button>
+                )}
+                <Button asChild>
+                  <Link href="/partidos/nuevo">Crear partido</Link>
+                </Button>
+              </div>
+            </div>
+          )}
+        </section>
+      </div>
+
+      <div className={cn("relative min-w-0 flex-col gap-3 px-4 pt-4 min-[900px]:flex-1 min-[900px]:p-0", view === "lista" ? "hidden min-[900px]:flex" : "flex")}>
         <div className="min-[900px]:hidden">
           <MobileBar activeFilters={activeFilters} view={view} onView={setView} onOpenFilters={() => setFiltersOpen(true)} />
         </div>
@@ -185,9 +194,11 @@ export function ExploreView({
           activeId={activeId}
           onPinClick={onPinClick}
           onCenterChange={onCenterChange}
-          className="h-[calc(100dvh-200px)] min-h-[360px] min-[900px]:h-[600px]"
+          className="h-[calc(100dvh-200px)] min-h-[360px] min-[900px]:h-auto min-[900px]:flex-1 min-[900px]:rounded-none min-[900px]:border-0 min-[900px]:border-l min-[900px]:shadow-none"
         />
-        <span className="w-fit rounded-full bg-navy px-3 py-1.5 text-xs text-navy-200">Moviendo el mapa se actualiza la lista</span>
+        <span className="pointer-events-none absolute bottom-4 left-1/2 hidden w-fit -translate-x-1/2 rounded-full bg-navy px-3 py-1.5 text-xs text-navy-200 shadow-md min-[900px]:block">
+          Moviendo el mapa se actualiza la lista
+        </span>
       </div>
 
       <Dialog open={filtersOpen} onOpenChange={setFiltersOpen}>

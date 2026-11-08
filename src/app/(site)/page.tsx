@@ -4,7 +4,8 @@ import { MatchTile, SportMonogram } from "@/components/match/match-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatTime, formatWeekday } from "@/lib/dates";
-import { DEFAULT_CENTER } from "@/lib/geo";
+import { DEFAULT_CENTER, DEFAULT_ZONE_LABEL } from "@/lib/geo";
+import { getSavedLocation } from "@/server/location";
 import { cn } from "@/lib/utils";
 import { DEFAULT_FILTERS, exploreHref } from "@/lib/validations/search";
 import { getActor } from "@/server/auth/session";
@@ -74,8 +75,9 @@ function FeaturedCard({ match }: { match: MatchSearchResult }) {
 }
 
 export default async function HomePage() {
-  const actor = await getActor();
-  const base = { center: DEFAULT_CENTER, radiusKm: DEFAULT_FILTERS.km, sort: "pronto" as const, limit: 3 };
+  const [actor, { location }] = await Promise.all([getActor(), getSavedLocation()]);
+  const place = location ? (location.city ?? "Cerca tuyo") : "Rosario";
+  const base = { center: location?.center ?? DEFAULT_CENTER, radiusKm: DEFAULT_FILTERS.km, sort: "pronto" as const, limit: 3 };
   const [sports, week] = await Promise.all([listActiveSports(), searchMatches(actor, { ...base, when: "semana" })]);
   // Si esta semana no hay nada, mostramos lo próximo que haya.
   const thisWeek = week.total > 0;
@@ -89,8 +91,8 @@ export default async function HomePage() {
         <div className="flex flex-col gap-5">
           <Badge variant="neutral" className="self-start">
             {thisWeek
-              ? `Rosario · ${week.total === 1 ? "1 partido" : `${week.total} partidos`} esta semana`
-              : "Rosario · fútbol, pádel, vóley y más"}
+              ? `${place} · ${week.total === 1 ? "1 partido" : `${week.total} partidos`} esta semana`
+              : `${place} · fútbol, pádel, vóley y más`}
           </Badge>
           <h1 className="text-[40px] leading-[1.05] tracking-[-0.03em] sm:text-[54px]">
             Te faltan tres
@@ -102,7 +104,10 @@ export default async function HomePage() {
             votan cuál les sirve y el partido se confirma solo cuando llega al
             cupo.
           </p>
-          <HomeSearch sports={sports.map(({ slug, name }) => ({ slug, name }))} />
+          <HomeSearch
+            sports={sports.map(({ slug, name }) => ({ slug, name }))}
+            defaultZone={location ? (location.city ?? "Tu ubicación") : DEFAULT_ZONE_LABEL}
+          />
           <nav aria-label="Deportes" className="flex flex-wrap gap-2">
             {sports.slice(0, 4).map((s) => (
               <Link key={s.slug} href={exploreHref({ ...DEFAULT_FILTERS, sport: s.slug })} className={cn(tagLink, "tag-neutral hover:bg-neutral-300")}>

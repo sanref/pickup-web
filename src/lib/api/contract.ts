@@ -1,11 +1,13 @@
 // Contrato de la API v1 (/api/v1/*), la que consume la app mobile.
-// Solo tipos: se derivan de los servicios para que la API y este archivo no se desincronicen.
-// Las fechas viajan como string ISO 8601 en UTC (de ahí Jsonify).
+//
+// Autocontenido a propósito: solo importa de ../validations (que solo depende de zod), para que
+// pickup-mobile lo pueda copiar tal cual (scripts/sync-shared de la app). Que coincida con lo que
+// devuelven los servicios lo garantiza src/server/api/contract-check.ts: si un servicio cambia y
+// este archivo no, `npm run typecheck` falla.
+//
+// Las fechas viajan como string ISO 8601 en UTC.
 
-import type { ManageSlot, MatchDetail, MyMatch, ParticipantStatus } from "@/server/services/matches";
-import type { Sport, UserSport } from "@/server/services/profiles";
-import type { MatchSearchResult } from "@/server/services/search";
-import type { CreateVenueResult, VenueSummary } from "@/server/services/venues";
+import type { SkillLevel } from "../validations/profile";
 
 export type Jsonify<T> = T extends Date
   ? string
@@ -26,7 +28,8 @@ export type ApiErrorCode =
   | "forbidden" // 403
   | "not_found" // 404
   | "rejected" // 422: regla de negocio (votación cerrada, sin lugar…); `message` es para el usuario
-  | "internal"; // 500
+  | "internal" // 500
+  | "unavailable"; // 503: una función que depende de un servicio no configurado (Google Places)
 
 export type ApiSuccess<T> = { data: T };
 export type ApiErrorBody = {
@@ -34,9 +37,18 @@ export type ApiErrorBody = {
 };
 export type ApiResponse<T> = ApiSuccess<T> | ApiErrorBody;
 
-// — Recursos —
+// — Enumerados —
 
-export type ApiSport = Sport;
+export type MatchStatus = "draft" | "open" | "confirmed" | "played" | "cancelled";
+export type ParticipantStatus = "interested" | "confirmed" | "waitlist" | "left";
+export type VenueStatus = "verified" | "pending" | "rejected";
+export type Visibility = "public" | "private";
+export type LatLng = { lat: number; lng: number };
+
+// — Perfil —
+
+export type ApiSport = { id: number; slug: string; name: string; defaultCapacity: number };
+export type ApiUserSport = { sportId: number; level: SkillLevel };
 
 export type ApiMe = {
   user: { id: string; email: string; name: string; image: string | null; emailVerified: boolean; isAdmin: boolean };
@@ -47,15 +59,118 @@ export type ApiMe = {
     bio: string | null;
     onboarded: boolean;
   };
-  sports: UserSport[];
+  sports: ApiUserSport[];
   stats: { played: number; organized: number };
 };
 
-export type ApiMatchSearch = Jsonify<{ total: number; matches: MatchSearchResult[] }>;
-export type ApiMatchDetail = Jsonify<MatchDetail>;
-export type ApiMyMatch = Jsonify<MyMatch>;
-export type ApiManageSlot = Jsonify<ManageSlot>;
+// — Partidos —
+
+export type ApiMatchSearchResult = {
+  id: string;
+  title: string;
+  status: "open" | "confirmed";
+  capacity: number;
+  level: SkillLevel | null;
+  pricePerPerson: number | null;
+  sport: { id: number; name: string; slug: string };
+  venue: { id: string; name: string; city: string; timezone: string; location: LatLng };
+  distanceKm: number;
+  /** Opciones dentro de la ventana de fechas (en un confirmado, solo el horario confirmado). */
+  slots: string[];
+  /** Votos de la opción que va ganando (en votación) o confirmados. */
+  filled: number;
+  missing: number;
+  participantCount: number;
+  /** Los primeros anotados, para la pila de avatares. */
+  people: { userId: string; displayName: string; avatarUrl: string | null }[];
+  viewerJoined: boolean;
+};
+export type ApiMatchSearch = { total: number; matches: ApiMatchSearchResult[] };
+
+export type ApiMatchParticipant = {
+  userId: string;
+  displayName: string;
+  avatarUrl: string | null;
+  status: ParticipantStatus;
+  isOrganizer: boolean;
+  slotIds: string[];
+};
+
+export type ApiMatchDetail = {
+  id: string;
+  title: string;
+  description: string | null;
+  status: MatchStatus;
+  visibility: Visibility;
+  capacity: number;
+  level: SkillLevel | null;
+  pricePerPerson: number | null;
+  currency: string;
+  inviteCode: string | null;
+  autoConfirm: boolean;
+  confirmedSlotId: string | null;
+  /** Jugado, o confirmado con el horario ya empezado. */
+  played: boolean;
+  sport: { id: number; name: string; slug: string };
+  venue: { id: string; name: string; address: string; city: string; timezone: string; location: LatLng };
+  organizer: { userId: string; displayName: string; avatarUrl: string | null };
+  slots: { id: string; startsAt: string; endsAt: string; votes: number }[];
+  /** Orden: confirmados por orden de confirmación, lista de espera por turno, interesados por llegada. */
+  participants: ApiMatchParticipant[];
+  viewer: {
+    userId: string | null;
+    isOrganizer: boolean;
+    isParticipant: boolean;
+    status: ParticipantStatus | null;
+    waitlistPosition: number | null;
+    slotIds: string[];
+  };
+};
+
+export type ApiMyMatch = {
+  id: string;
+  title: string;
+  status: MatchStatus;
+  capacity: number;
+  isOrganizer: boolean;
+  myStatus: ParticipantStatus | null;
+  waitlistPosition: number | null;
+  organizerName: string;
+  venueName: string;
+  timezone: string;
+  pricePerPerson: number | null;
+  slots: { startsAt: string; votes: number }[];
+  confirmedStartsAt: string | null;
+  /** Cancelado, jugado o confirmado con el horario ya empezado. */
+  isPast: boolean;
+  participants: number;
+  confirmed: number;
+  myVotes: number;
+};
+
+export type ApiManageSlot = { id: string; startsAt: string; voters: { userId: string; displayName: string }[] };
+export type ApiManage = { slots: ApiManageSlot[] };
+export type ApiCreatedMatch = { id: string };
 export type ApiJoinResult = { status: ParticipantStatus };
-export type ApiVenue = VenueSummary;
-export type ApiVenueDetail = VenueSummary & { googlePlaceId: string | null; isMine: boolean };
-export type ApiCreateVenueResult = CreateVenueResult;
+export type ApiInvite = { matchId: string };
+
+// — Sedes —
+
+export type ApiVenue = {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  status: VenueStatus;
+  location: LatLng;
+  sports: { id: number; name: string }[];
+  distanceKm?: number;
+};
+export type ApiVenueDetail = ApiVenue & { googlePlaceId: string | null; isMine: boolean };
+export type ApiCreateVenueResult = { id: string; existing: boolean };
+
+// — Google Places (para proponer una sede) —
+
+export type ApiPlaceSuggestion = { placeId: string; main: string; secondary: string };
+/** Listo para POST /venues/similar y POST /venues (más los deportes). */
+export type ApiPlace = { googlePlaceId: string; name: string; address: string; city: string; location: LatLng };

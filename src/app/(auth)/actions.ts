@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { safeNext, withNext } from "@/lib/safe-next";
 import { auth } from "@/server/auth/neon";
+import { resetPasswordWithOtp } from "@/server/auth/reset-password";
 import { requestOrigin } from "@/server/request-origin";
 import { ensureProfile } from "@/server/services/profiles";
 
@@ -148,7 +149,7 @@ export async function resetPassword(_prev: AuthFormState, form: FormData): Promi
     .safeParse({ email: form.get("email"), otp: form.get("otp"), password: form.get("password") });
   if (!parsed.success) return { error: firstIssue(parsed.error), email: String(form.get("email") ?? "") };
 
-  const { error } = await auth.emailOtp.resetPassword(parsed.data);
+  const { error } = await resetPasswordWithOtp(parsed.data);
   if (error) return { error: describe(error), email: parsed.data.email };
   redirect(withNext("/login?contrasena=1", next));
 }
