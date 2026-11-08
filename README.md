@@ -3,6 +3,7 @@
 App para armar partidos (fútbol, pádel, vóley…): el organizador propone sede y horarios, la gente vota y se suma hasta completar el cupo.
 
 - Plan técnico: [docs/plan-tecnico.md](docs/plan-tecnico.md)
+- API para la app mobile (`/api/v1`): [docs/api-v1.md](docs/api-v1.md)
 - Diseño (sistema Organic): [_handoff/design_handoff_pickup_mvp/](_handoff/design_handoff_pickup_mvp/README.md)
 
 ## Stack

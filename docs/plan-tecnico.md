@@ -264,7 +264,7 @@ Cada servicio recibe `actor` (el usuario, o `null` si es anónimo), valida con z
 
 > ⚠️ En el plan **Hobby** de Vercel, el cron solo corre una vez por día. Para el lanzamiento hace falta **Vercel Pro**, o usar **Upstash QStash** (tiene un nivel gratis) llamando a los mismos endpoints.
 
-**Preparado para mobile:** más adelante se exponen route handlers `/api/v1/*` que llaman a los mismos servicios.
+**Preparado para mobile:** los route handlers `/api/v1/*` llaman a los mismos servicios, con auth por JWT de Neon Auth. Ver [api-v1.md](api-v1.md).
 
 ---
 

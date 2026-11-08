@@ -1,6 +1,6 @@
 import "server-only";
-import { revalidatePath } from "next/cache";
 import { UserError } from "@/server/errors";
+import { revalidateMatchViews } from "@/server/revalidate";
 
 export type MatchActionResult<T = null> = { ok: true; value: T } | { ok: false; error: string };
 
@@ -14,7 +14,6 @@ export async function runMatchAction<T>(matchId: string, fn: () => Promise<T>): 
     console.error("[partidos]", error);
     return { ok: false, error: "No pudimos guardar el cambio. Probá de nuevo." };
   }
-  revalidatePath(`/partidos/${matchId}`);
-  revalidatePath("/mis-partidos");
+  revalidateMatchViews(matchId);
   return { ok: true, value };
 }
