@@ -188,7 +188,8 @@ export async function mergeVenue(actor: Actor, id: string, intoId: string) {
       .where(and(eq(venues.id, intoId), isNull(venues.mergedIntoId)))
       .for("update");
     if (!target) throw new Error("La sede destino no existe");
-    await tx.update(matches).set({ venueId: intoId }).where(eq(matches.venueId, id));
+    // Las canchas son de la sede duplicada: los partidos que pasan a la otra sede quedan sin cancha.
+    await tx.update(matches).set({ venueId: intoId, courtId: null }).where(eq(matches.venueId, id));
     await tx
       .update(venues)
       .set({ mergedIntoId: intoId, status: "rejected", googlePlaceId: null, reviewedBy: actor.user.id, reviewedAt: new Date() })

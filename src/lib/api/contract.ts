@@ -113,6 +113,8 @@ export type ApiMatchDetail = {
   played: boolean;
   sport: { id: number; name: string; slug: string };
   venue: { id: string; name: string; address: string; city: string; timezone: string; location: LatLng };
+  /** Cancha de la sede, si el organizador eligió una. */
+  court: { id: string; name: string } | null;
   organizer: { userId: string; displayName: string; avatarUrl: string | null };
   slots: { id: string; startsAt: string; endsAt: string; votes: number }[];
   /** Orden: confirmados por orden de confirmación, lista de espera por turno, interesados por llegada. */

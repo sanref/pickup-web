@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getActor } from "@/server/auth/session";
 import { isAdmin } from "@/server/authz";
+import { hasManagedVenues } from "@/server/services/venue-admin";
 import { UserMenu } from "./user-menu";
 
 const NAV_LINKS = [
@@ -15,6 +16,7 @@ const NAV_LINKS = [
 // Siempre fija arriba; su alto es --site-header-h, que usan los demás elementos sticky para quedar debajo.
 export async function SiteHeader() {
   const actor = await getActor();
+  const managesVenues = actor ? await hasManagedVenues(actor.user.id) : false;
   return (
     <header className="sticky top-0 z-40 flex h-(--site-header-h) shrink-0 items-center gap-[26px] bg-navy px-4 min-[900px]:px-10">
       <Link href="/" className="mr-auto font-display text-[23px] text-surface no-underline">
@@ -46,6 +48,7 @@ export async function SiteHeader() {
             email={actor.user.email}
             avatarUrl={actor.profile.avatarUrl}
             isAdmin={isAdmin(actor)}
+            managesVenues={managesVenues}
           />
         )}
       </div>

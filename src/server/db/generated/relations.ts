@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { profiles, venues, sports, teams, matches, matchSlots, notifications, venueSports, userSports, teamMembers, slotVotes, matchParticipants } from "./schema";
+import { profiles, venues, sports, teams, matches, matchSlots, notifications, courts, courtBookings, venueSports, userSports, venueManagers, teamMembers, slotVotes, matchParticipants } from "./schema";
 
 export const venuesRelations = relations(venues, ({one, many}) => ({
 	profile_createdBy: one(profiles, {
@@ -20,8 +20,10 @@ export const venuesRelations = relations(venues, ({one, many}) => ({
 	venues: many(venues, {
 		relationName: "venues_mergedIntoId_venues_id"
 	}),
+	courts: many(courts),
 	matches: many(matches),
 	venueSports: many(venueSports),
+	venueManagers: many(venueManagers),
 }));
 
 export const profilesRelations = relations(profiles, ({many}) => ({
@@ -32,9 +34,16 @@ export const profilesRelations = relations(profiles, ({many}) => ({
 		relationName: "venues_reviewedBy_profiles_userId"
 	}),
 	teams: many(teams),
-	matches: many(matches),
 	notifications: many(notifications),
+	courtBookings: many(courtBookings),
+	matches: many(matches),
 	userSports: many(userSports),
+	venueManagers_userId: many(venueManagers, {
+		relationName: "venueManagers_userId_profiles_userId"
+	}),
+	venueManagers_addedBy: many(venueManagers, {
+		relationName: "venueManagers_addedBy_profiles_userId"
+	}),
 	teamMembers: many(teamMembers),
 	matchParticipants: many(matchParticipants),
 }));
@@ -54,12 +63,30 @@ export const teamsRelations = relations(teams, ({one, many}) => ({
 
 export const sportsRelations = relations(sports, ({many}) => ({
 	teams: many(teams),
+	courts: many(courts),
 	matches: many(matches),
 	venueSports: many(venueSports),
 	userSports: many(userSports),
 }));
 
+export const matchSlotsRelations = relations(matchSlots, ({one, many}) => ({
+	match: one(matches, {
+		fields: [matchSlots.matchId],
+		references: [matches.id],
+		relationName: "matchSlots_matchId_matches_id"
+	}),
+	matches: many(matches, {
+		relationName: "matches_id_matchSlots_id"
+	}),
+	slotVotes: many(slotVotes),
+}));
+
 export const matchesRelations = relations(matches, ({one, many}) => ({
+	matchSlots: many(matchSlots, {
+		relationName: "matchSlots_matchId_matches_id"
+	}),
+	notifications: many(notifications),
+	courtBookings: many(courtBookings),
 	sport: one(sports, {
 		fields: [matches.sportId],
 		references: [sports.id]
@@ -81,23 +108,11 @@ export const matchesRelations = relations(matches, ({one, many}) => ({
 		references: [matchSlots.id],
 		relationName: "matches_id_matchSlots_id"
 	}),
-	matchSlots: many(matchSlots, {
-		relationName: "matchSlots_matchId_matches_id"
+	court: one(courts, {
+		fields: [matches.venueId],
+		references: [courts.id]
 	}),
-	notifications: many(notifications),
 	matchParticipants: many(matchParticipants),
-}));
-
-export const matchSlotsRelations = relations(matchSlots, ({one, many}) => ({
-	matches: many(matches, {
-		relationName: "matches_id_matchSlots_id"
-	}),
-	match: one(matches, {
-		fields: [matchSlots.matchId],
-		references: [matches.id],
-		relationName: "matchSlots_matchId_matches_id"
-	}),
-	slotVotes: many(slotVotes),
 }));
 
 export const notificationsRelations = relations(notifications, ({one}) => ({
@@ -108,6 +123,34 @@ export const notificationsRelations = relations(notifications, ({one}) => ({
 	match: one(matches, {
 		fields: [notifications.matchId],
 		references: [matches.id]
+	}),
+}));
+
+export const courtsRelations = relations(courts, ({one, many}) => ({
+	venue: one(venues, {
+		fields: [courts.venueId],
+		references: [venues.id]
+	}),
+	sport: one(sports, {
+		fields: [courts.sportId],
+		references: [sports.id]
+	}),
+	courtBookings: many(courtBookings),
+	matches: many(matches),
+}));
+
+export const courtBookingsRelations = relations(courtBookings, ({one}) => ({
+	court: one(courts, {
+		fields: [courtBookings.courtId],
+		references: [courts.id]
+	}),
+	match: one(matches, {
+		fields: [courtBookings.matchId],
+		references: [matches.id]
+	}),
+	profile: one(profiles, {
+		fields: [courtBookings.createdBy],
+		references: [profiles.userId]
 	}),
 }));
 
@@ -130,6 +173,23 @@ export const userSportsRelations = relations(userSports, ({one}) => ({
 	sport: one(sports, {
 		fields: [userSports.sportId],
 		references: [sports.id]
+	}),
+}));
+
+export const venueManagersRelations = relations(venueManagers, ({one}) => ({
+	venue: one(venues, {
+		fields: [venueManagers.venueId],
+		references: [venues.id]
+	}),
+	profile_userId: one(profiles, {
+		fields: [venueManagers.userId],
+		references: [profiles.userId],
+		relationName: "venueManagers_userId_profiles_userId"
+	}),
+	profile_addedBy: one(profiles, {
+		fields: [venueManagers.addedBy],
+		references: [profiles.userId],
+		relationName: "venueManagers_addedBy_profiles_userId"
 	}),
 }));
 

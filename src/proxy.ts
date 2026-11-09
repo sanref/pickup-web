@@ -29,5 +29,6 @@ export const config = {
     "/equipos/:path*",
     "/sedes/nueva",
     "/admin/:path*",
+    "/gestion/:path*",
   ],
 };

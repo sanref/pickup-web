@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { VenueStatusBadge } from "@/components/venue/venue-card";
 import { VenueMap } from "@/components/venue/venue-map";
 import { getActor } from "@/server/auth/session";
+import { canManageVenue } from "@/server/services/venue-admin";
 import { getVenue } from "@/server/services/venues";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -25,6 +26,7 @@ export async function generateMetadata({ params }: PageProps<"/sedes/[id]">): Pr
 
 export default async function VenuePage({ params, searchParams }: PageProps<"/sedes/[id]">) {
   const venue = await load((await params).id);
+  const canManage = await canManageVenue(await getActor(), venue.id);
   const alreadyExisted = (await searchParams).existente === "1";
   const directions = `https://www.google.com/maps/search/?api=1&query=${venue.location.lat},${venue.location.lng}`;
 
@@ -74,6 +76,11 @@ export default async function VenuePage({ params, searchParams }: PageProps<"/se
               Cómo llegar
             </a>
           </Button>
+          {canManage && (
+            <Button asChild variant="navy">
+              <Link href={`/gestion/${venue.id}/turnos`}>Gestionar sede</Link>
+            </Button>
+          )}
         </div>
       </div>
       <VenueMap

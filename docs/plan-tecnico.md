@@ -26,6 +26,9 @@ Querés una app para que la gente que quiere jugar un deporte (fútbol 5, vóley
 | **Deporte** | Fútbol 5, Fútbol 7, Pádel, Tenis singles o dobles, Vóley… Cada uno tiene un cupo por defecto (10, 14, 4, 2/4, 12). |
 | **Sede** | Una cancha o club con ubicación geográfica y los deportes que ofrece. Puede estar `verified` (catálogo) o `pending` (la propuso un usuario). |
 | **Partido** (convocatoria) | La entidad central: deporte, sede, cupo, nivel, precio por persona, visibilidad y varias **opciones de horario**. |
+| **Admin de sede** | Usuario asignado a una o más sedes (`venue_managers`) por un admin del sitio. Gestiona los datos de la sede, sus canchas y sus turnos desde `/gestion` (solo web). No es un rol global de Neon Auth: el permiso es por sede. |
+| **Cancha** | Espacio de juego de una sede (`courts`): nombre, actividad (un deporte del catálogo) y **turno mínimo**; los turnos duran ese tiempo o un múltiplo. Se desactiva en vez de borrarse si ya tiene historial. |
+| **Turno** | Reserva de una cancha (`court_bookings`). La carga la sede, o se genera al confirmar un partido que eligió esa cancha. Postgres impide turnos superpuestos en la misma cancha (`exclude using gist`). |
 | **Opción de horario** | Una fecha y hora concreta que propone el organizador (`starts_at`, `ends_at`). |
 | **Voto** | "Esta opción me sirve". Cada usuario marca una o varias opciones. |
 | **Participante** | Un usuario que se sumó a un partido. Su estado es `interested`, `confirmed`, `waitlist` o `left`. |
@@ -114,6 +117,7 @@ draft ──publicar──► open (votación) ──confirmar opción──► 
 | Proponer una sede, ver "Mis partidos" o "Mis equipos" | → login | ✅ |
 | Ver el link de contacto (grupo de WhatsApp) | ❌ | Solo si es confirmado |
 | Panel de admin | ❌ | Solo con `role = admin` |
+| Gestión de una sede (`/gestion/[id]`) | ❌ | Admins de esa sede y admins del sitio |
 
 El parámetro `next` hace que, después de iniciar sesión o de verificar el email, el usuario vuelva al partido que estaba mirando.
 

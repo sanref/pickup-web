@@ -77,6 +77,7 @@ Los dos de `/places` consultan Google Places (New) desde el servidor con `GOOGLE
 
 Quedan fuera a propósito:
 - La **moderación** (`/admin/*`) sigue solo en la web.
+- La **gestión de sedes** (`/gestion/*`: canchas, turnos, admins de sede) es solo web. Para la app, `createMatchSchema` acepta `courtId` opcional (una cancha activa de la sede para ese deporte; las duraciones tienen que ser múltiplo de su turno mínimo, y sin cancha siguen siendo 60, 90 o 120) y `ApiMatchDetail` trae `court` (o `null`).
 - **Cambiar la contraseña** se hace directo contra Neon Auth (`POST /change-password`).
 - `GET /matches` sin `lat`/`lng` busca en la ciudad piloto. La web usa la cookie de ubicación; la app manda la del teléfono.
 

@@ -2,15 +2,17 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 import { and, asc, desc, eq, inArray, isNull, ne, notInArray, or, sql } from "drizzle-orm";
 import { zonedToUtc } from "@/lib/dates";
-import type { CreateMatchInput } from "@/lib/validations/match";
+import { DURATIONS, type CreateMatchInput } from "@/lib/validations/match";
+import { formatDuration, isValidDuration } from "@/lib/validations/venue-admin";
 import type { SkillLevel } from "@/lib/validations/profile";
 import type { Actor } from "@/server/auth/session";
 import { isAdmin } from "@/server/authz";
 import { db, schema } from "@/server/db/client";
 import { UserError } from "@/server/errors";
 import { alreadyNotified, notify, type NewNotification } from "./notifications";
+import { findCourtConflict } from "./venue-admin";
 
-const { matches, matchSlots, matchParticipants, slotVotes, sports, venues, profiles } = schema;
+const { matches, matchSlots, matchParticipants, slotVotes, sports, venues, profiles, courts, courtBookings } = schema;
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 export type MatchStatus = (typeof matches.$inferSelect)["status"];
@@ -42,6 +44,28 @@ export async function createMatch(actor: Actor, input: CreateMatchInput): Promis
       venue && (venue.status === "verified" || (venue.status === "pending" && (venue.createdBy === actor.user.id || isAdmin(actor))));
     if (!venueUsable) throw new UserError("Esa sede no está disponible.");
 
+    let court: { id: string; name: string; slotMinutes: number } | null = null;
+    if (input.courtId) {
+      const [row] = await tx
+        .select({ id: courts.id, name: courts.name, slotMinutes: courts.slotMinutes })
+        .from(courts)
+        .where(
+          and(eq(courts.id, input.courtId), eq(courts.venueId, input.venueId), eq(courts.sportId, input.sportId), eq(courts.isActive, true)),
+        );
+      if (!row) throw new UserError("Esa cancha no está disponible para este deporte.");
+      court = row;
+    }
+    for (const s of input.slots) {
+      const ok = court
+        ? isValidDuration(s.durationMinutes, court.slotMinutes)
+        : (DURATIONS as readonly number[]).includes(s.durationMinutes);
+      if (!ok) {
+        throw new UserError(
+          court ? `En ${court.name} los turnos son de ${formatDuration(court.slotMinutes)} o múltiplos.` : "Revisá la duración de los horarios.",
+        );
+      }
+    }
+
     const now = Date.now();
     const slots = input.slots.map((s) => {
       const startsAt = zonedToUtc(s.date, s.time, venue.timezone);
@@ -57,12 +81,20 @@ export async function createMatch(actor: Actor, input: CreateMatchInput): Promis
       throw new UserError("Hay dos horarios iguales.");
     }
     slots.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+    if (court) {
+      for (const s of slots) {
+        if (await findCourtConflict(tx, court.id, s.startsAt, s.endsAt)) {
+          throw new UserError(`${court.name} ya está ocupada en alguno de los horarios. Elegí otro horario u otra cancha.`);
+        }
+      }
+    }
 
     const [match] = await tx
       .insert(matches)
       .values({
         sportId: input.sportId,
         venueId: input.venueId,
+        courtId: court?.id ?? null,
         organizerId: actor.user.id,
         title: input.title,
         description: input.description || null,
@@ -137,6 +169,8 @@ export type MatchDetail = {
   played: boolean;
   sport: { id: number; name: string; slug: string };
   venue: { id: string; name: string; address: string; city: string; timezone: string; location: { lat: number; lng: number } };
+  /** Cancha de la sede, si el organizador eligió una. */
+  court: { id: string; name: string } | null;
   organizer: { userId: string; displayName: string; avatarUrl: string | null };
   slots: { id: string; startsAt: Date; endsAt: Date; votes: number }[];
   /** Orden: confirmados por orden de confirmación, lista de espera por turno, interesados por llegada. */
@@ -165,11 +199,13 @@ export async function getMatchDetail(actor: Actor | null, id: string, invite?: s
         location: venues.location,
       },
       organizer: { userId: profiles.userId, displayName: profiles.displayName, avatarUrl: profiles.avatarUrl },
+      courtName: courts.name,
     })
     .from(matches)
     .innerJoin(sports, eq(sports.id, matches.sportId))
     .innerJoin(venues, eq(venues.id, matches.venueId))
     .innerJoin(profiles, eq(profiles.userId, matches.organizerId))
+    .leftJoin(courts, eq(courts.id, matches.courtId))
     .where(eq(matches.id, id));
   if (!row || !(await canView(db, actor, row.match, invite))) return null;
 
@@ -232,6 +268,7 @@ export async function getMatchDetail(actor: Actor | null, id: string, invite?: s
       (row.match.status === "confirmed" && slots.some((s) => s.id === row.match.confirmedSlotId && s.startsAt.getTime() <= Date.now())),
     sport: row.sport,
     venue: { ...row.venue, location: row.venue.location! },
+    court: row.match.courtId && row.courtName ? { id: row.match.courtId, name: row.courtName } : null,
     organizer: { ...row.organizer, displayName: publicName(row.organizer.displayName, loggedIn) },
     slots: slots.map((s) => ({ ...s, votes: votes.filter((v) => v.slotId === s.id).length })),
     participants,
@@ -273,7 +310,13 @@ export async function getSlotVoters(matchId: string): Promise<ManageSlot[]> {
 
 // — Ciclo de vida (todas las escrituras bloquean la fila del partido: sin sobreinscripción) —
 
-type LockedMatch = AccessRow & { title: string; capacity: number; autoConfirm: boolean; confirmedSlotId: string | null };
+type LockedMatch = AccessRow & {
+  title: string;
+  capacity: number;
+  autoConfirm: boolean;
+  confirmedSlotId: string | null;
+  courtId: string | null;
+};
 
 async function lockMatch(tx: Tx, actor: Actor, matchId: string, invite?: string | null): Promise<LockedMatch> {
   const [match] = await tx
@@ -287,6 +330,7 @@ async function lockMatch(tx: Tx, actor: Actor, matchId: string, invite?: string 
       capacity: matches.capacity,
       autoConfirm: matches.autoConfirm,
       confirmedSlotId: matches.confirmedSlotId,
+      courtId: matches.courtId,
     })
     .from(matches)
     .where(eq(matches.id, matchId))
@@ -334,6 +378,7 @@ async function setParticipant(tx: Tx, matchId: string, userId: string, status: P
 // Confirma la opción: los que la votaron entran por orden de voto hasta el cupo y el resto va a la
 // lista de espera en ese mismo orden. A los demás anotados se les avisa para que se sumen si queda lugar.
 async function confirmInTx(tx: Tx, match: LockedMatch, slotId: string, byUserId: string | null) {
+  if (match.courtId) await bookCourt(tx, match, slotId);
   const voters = await tx
     .select({ userId: slotVotes.userId })
     .from(slotVotes)
@@ -373,6 +418,32 @@ async function confirmInTx(tx: Tx, match: LockedMatch, slotId: string, byUserId:
   ]);
 }
 
+async function slotTimes(tx: Tx, slotId: string) {
+  const [slot] = await tx.select({ startsAt: matchSlots.startsAt, endsAt: matchSlots.endsAt }).from(matchSlots).where(eq(matchSlots.id, slotId));
+  return slot ?? null;
+}
+
+// ¿La cancha del partido está ocupada en el horario de esa opción?
+async function slotCourtConflict(tx: Tx, match: LockedMatch, slotId: string): Promise<boolean> {
+  if (!match.courtId) return false;
+  const slot = await slotTimes(tx, slotId);
+  return !!slot && !!(await findCourtConflict(tx, match.courtId, slot.startsAt, slot.endsAt));
+}
+
+// Al confirmar un partido con cancha se le reserva el turno. Si la sede ya dio ese horario, no se confirma.
+async function bookCourt(tx: Tx, match: LockedMatch, slotId: string) {
+  const slot = await slotTimes(tx, slotId);
+  if (!slot || !match.courtId) return;
+  // Bloquea la cancha: dos confirmaciones simultáneas sobre la misma cancha quedan en fila.
+  await tx.select({ id: courts.id }).from(courts).where(eq(courts.id, match.courtId)).for("update");
+  if (await findCourtConflict(tx, match.courtId, slot.startsAt, slot.endsAt)) {
+    throw new UserError("La cancha ya está reservada en ese horario. Elegí otra opción o hablá con la sede.");
+  }
+  await tx
+    .insert(courtBookings)
+    .values({ courtId: match.courtId, matchId: match.id, startsAt: slot.startsAt, endsAt: slot.endsAt, createdBy: match.organizerId });
+}
+
 // Si una opción llegó al cupo: con confirmación automática se confirma; si no, se le avisa (una vez) al organizador.
 async function checkQuorum(tx: Tx, match: LockedMatch) {
   const [full] = await tx
@@ -388,7 +459,8 @@ async function checkQuorum(tx: Tx, match: LockedMatch) {
     .orderBy(asc(matchSlots.startsAt))
     .limit(1);
   if (!full) return;
-  if (match.autoConfirm) {
+  // Con la cancha ocupada en ese horario no se confirma sola: decide el organizador.
+  if (match.autoConfirm && !(await slotCourtConflict(tx, match, full.slotId))) {
     await confirmInTx(tx, match, full.slotId, null);
   } else if (!(await alreadyNotified(tx, match.id, "slot_full", "slotId", full.slotId))) {
     await notify(tx, [{ userId: match.organizerId, type: "slot_full", matchId: match.id, payload: { slotId: full.slotId, title: match.title } }]);
@@ -543,6 +615,11 @@ export async function cancelMatch(actor: Actor, matchId: string) {
     assertOrganizer(actor, match);
     if (match.status !== "open" && match.status !== "confirmed") throw new UserError("Este partido ya no se puede cancelar.");
     await tx.update(matches).set({ status: "cancelled", cancelledAt: new Date() }).where(eq(matches.id, matchId));
+    // Libera el turno de la cancha, si lo tenía.
+    await tx
+      .update(courtBookings)
+      .set({ status: "cancelled", cancelledAt: new Date() })
+      .where(and(eq(courtBookings.matchId, matchId), eq(courtBookings.status, "booked")));
     const people = await tx
       .select({ userId: matchParticipants.userId })
       .from(matchParticipants)

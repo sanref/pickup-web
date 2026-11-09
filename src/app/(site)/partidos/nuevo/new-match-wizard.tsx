@@ -8,17 +8,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Segmented } from "@/components/ui/segmented";
 import { VenueCard } from "@/components/venue/venue-card";
-import { todayIn } from "@/lib/dates";
+import { timeToMinutes, todayIn } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { DURATIONS, MAX_SLOTS, type SlotInput } from "@/lib/validations/match";
 import { SKILL_LEVEL_LABELS, SKILL_LEVELS, type SkillLevel } from "@/lib/validations/profile";
+import { compactDurationOptions, formatDuration } from "@/lib/validations/venue-admin";
 import type { Sport } from "@/server/services/profiles";
+import type { CourtOption } from "@/server/services/venue-admin";
 import type { VenueSummary } from "@/server/services/venues";
-import { createMatchAction, searchVenuesForMatchAction } from "./actions";
+import { createMatchAction, getCourtBusyAction, listCourtsForMatchAction, searchVenuesForMatchAction } from "./actions";
 
 const STEPS = [
   { title: "¿Qué se juega?", description: "Elegí el deporte. El cupo sugerido lo podés cambiar al final." },
-  { title: "¿Dónde?", description: "Buscá la cancha en el catálogo." },
+  { title: "¿Dónde?", description: "Buscá la sede en el catálogo y, si querés, elegí la cancha." },
   { title: "¿Cuándo?", description: `Proponé hasta ${MAX_SLOTS} horarios posibles. Cada uno vota los que le sirven.` },
   { title: "Detalles", description: "Lo último antes de publicarlo." },
 ] as const;
@@ -31,9 +33,16 @@ const LEVEL_OPTIONS = [
 ];
 const TIMEZONE = "America/Argentina/Buenos_Aires";
 
+/** Duración que más se parece a la actual entre las que admite la cancha (o las de siempre, sin cancha). */
+function fitDuration(current: number, court: CourtOption | null): number {
+  const options: readonly number[] = court ? compactDurationOptions(court.slotMinutes) : DURATIONS;
+  return options.find((d) => d >= current) ?? options[options.length - 1] ?? current;
+}
+
 type Draft = {
   sportId: number | null;
   venue: VenueSummary | null;
+  court: CourtOption | null;
   slots: SlotInput[];
   title: string;
   description: string;
@@ -47,18 +56,22 @@ export function NewMatchWizard({
   sports,
   preferredSportId,
   presetVenue,
+  presetHasCourts = false,
 }: {
   sports: Sport[];
   preferredSportId: number | null;
   presetVenue: VenueSummary | null;
+  /** La sede precargada tiene canchas del deporte inicial: se arranca en "¿Dónde?" para elegirla. */
+  presetHasCourts?: boolean;
 }) {
   const presetSport = presetVenue?.sports.length === 1 ? presetVenue.sports[0].id : preferredSportId;
-  const [step, setStep] = useState(presetVenue && presetSport ? 2 : 0);
+  const [step, setStep] = useState(presetVenue && presetSport ? (presetHasCourts ? 1 : 2) : 0);
   const [draft, setDraft] = useState<Draft>(() => {
     const sport = sports.find((s) => s.id === presetSport);
     return {
       sportId: presetSport,
       venue: presetVenue,
+      court: null,
       slots: [{ date: "", time: "20:00", durationMinutes: DEFAULT_DURATION[sport?.slug ?? ""] ?? 60 }],
       title: "",
       description: "",
@@ -84,8 +97,21 @@ export function NewMatchWizard({
       capacity: String(s.defaultCapacity),
       slots: draft.slots.map((slot) => ({ ...slot, durationMinutes: duration })),
       venue: draft.venue && draft.venue.sports.some((vs) => vs.id === s.id) ? draft.venue : null,
+      // Las canchas son de un deporte: al cambiarlo hay que volver a elegirla.
+      court: s.id === draft.sportId ? draft.court : null,
     });
   }
+
+  function chooseVenue(venue: VenueSummary) {
+    if (venue.id === draft.venue?.id) return;
+    update({ venue, court: null, slots: draft.slots.map((s) => ({ ...s, durationMinutes: fitDuration(s.durationMinutes, null) })) });
+  }
+
+  function chooseCourt(court: CourtOption | null) {
+    update({ court, slots: draft.slots.map((s) => ({ ...s, durationMinutes: fitDuration(s.durationMinutes, court) })) });
+  }
+
+  const durationChoices: readonly number[] = draft.court ? compactDurationOptions(draft.court.slotMinutes) : DURATIONS;
 
   function validate(): string | null {
     if (step === 0 && !draft.sportId) return "Elegí un deporte.";
@@ -119,6 +145,7 @@ export function NewMatchWizard({
       const result = await createMatchAction({
         sportId: draft.sportId,
         venueId: draft.venue?.id,
+        courtId: draft.court?.id ?? null,
         title: draft.title,
         description: draft.description,
         capacity: Number(draft.capacity),
@@ -173,7 +200,21 @@ export function NewMatchWizard({
         </div>
       )}
 
-      {step === 1 && <VenueStep sportId={draft.sportId} selected={draft.venue} onSelect={(venue) => update({ venue })} />}
+      {step === 1 && (
+        <>
+          <VenueStep sportId={draft.sportId} selected={draft.venue} onSelect={chooseVenue} />
+          {draft.venue && draft.sportId && (
+            <CourtStep venueId={draft.venue.id} sportId={draft.sportId} selected={draft.court} onSelect={chooseCourt} />
+          )}
+        </>
+      )}
+
+      {step === 2 && draft.court && (
+        <p className="m-0 text-[13px] text-text-3">
+          Cancha: <strong className="font-semibold text-text-2">{draft.court.name}</strong> · turnos de {formatDuration(draft.court.slotMinutes)} o
+          múltiplos. Cuando confirmes el horario, la reservamos.
+        </p>
+      )}
 
       {step === 2 && (
         <div className="flex flex-col gap-3">
@@ -206,10 +247,8 @@ export function NewMatchWizard({
                   label="Duración"
                   size="sm"
                   value={String(slot.durationMinutes)}
-                  options={DURATIONS.map((d) => ({ value: String(d), label: d === 60 ? "1 h" : d === 90 ? "1 h 30" : "2 h" }))}
-                  onChange={(v) =>
-                    update({ slots: draft.slots.map((s, j) => (j === i ? { ...s, durationMinutes: Number(v) as SlotInput["durationMinutes"] } : s)) })
-                  }
+                  options={durationChoices.map((d) => ({ value: String(d), label: formatDuration(d) }))}
+                  onChange={(v) => update({ slots: draft.slots.map((s, j) => (j === i ? { ...s, durationMinutes: Number(v) } : s)) })}
                 />
               </div>
               {draft.slots.length > 1 && (
@@ -224,6 +263,7 @@ export function NewMatchWizard({
                   <X />
                 </Button>
               )}
+              {draft.court && slot.date && <CourtBusyHint courtId={draft.court.id} slot={slot} />}
             </div>
           ))}
           {draft.slots.length < MAX_SLOTS && (
@@ -360,5 +400,99 @@ function VenueStep({
         ¿No está? <Link href="/sedes/nueva">Proponé la sede</Link> y volvé a armar el partido.
       </span>
     </div>
+  );
+}
+
+// Canchas de la sede para el deporte elegido. Elegir una es opcional: sin cancha, el partido es "en la sede".
+function CourtStep({
+  venueId,
+  sportId,
+  selected,
+  onSelect,
+}: {
+  venueId: string;
+  sportId: number;
+  selected: CourtOption | null;
+  onSelect: (court: CourtOption | null) => void;
+}) {
+  const [loaded, setLoaded] = useState<{ key: string; courts: CourtOption[] } | null>(null);
+  const key = `${venueId}:${sportId}`;
+
+  useEffect(() => {
+    let cancelled = false;
+    listCourtsForMatchAction({ venueId, sportId }).then((courts) => {
+      if (!cancelled) setLoaded({ key, courts });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [venueId, sportId, key]);
+
+  if (!loaded || loaded.key !== key) return <div className="h-11 animate-pulse rounded-full bg-neutral-200" />;
+  if (loaded.courts.length === 0) return null;
+
+  const options = [{ id: null, label: "Sin cancha fija" }, ...loaded.courts.map((c) => ({ id: c.id, label: c.name }))];
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-xs text-text/70">Cancha (opcional)</span>
+      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Cancha">
+        {options.map((o) => {
+          const on = (selected?.id ?? null) === o.id;
+          return (
+            <button
+              key={o.id ?? "none"}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              onClick={() => onSelect(o.id ? (loaded.courts.find((c) => c.id === o.id) ?? null) : null)}
+              className={cn(
+                "min-h-11 rounded-full px-4 text-sm transition-colors duration-150",
+                on ? "bg-navy text-surface" : "tag-neutral hover:bg-neutral-300",
+              )}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+      <span className="text-[13px] text-text-3">
+        {selected
+          ? `Turnos de ${formatDuration(selected.slotMinutes)} o múltiplos. Al confirmar el horario, la cancha queda reservada.`
+          : "Si elegís una cancha, te mostramos qué horarios tiene ocupados y se reserva al confirmar."}
+      </span>
+    </div>
+  );
+}
+
+// Franjas ocupadas de la cancha ese día, y aviso si el horario propuesto se superpone.
+function CourtBusyHint({ courtId, slot }: { courtId: string; slot: SlotInput }) {
+  const [loaded, setLoaded] = useState<{ key: string; busy: { start: string; end: string }[] } | null>(null);
+  const key = `${courtId}:${slot.date}`;
+
+  useEffect(() => {
+    let cancelled = false;
+    getCourtBusyAction({ courtId, date: slot.date }).then((busy) => {
+      if (!cancelled) setLoaded({ key, busy });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [courtId, slot.date, key]);
+
+  if (!loaded || loaded.key !== key) return null;
+  const start = slot.time ? timeToMinutes(slot.time) : null;
+  const end = start === null ? null : start + slot.durationMinutes;
+  const clash =
+    start !== null && end !== null && loaded.busy.some((b) => timeToMinutes(b.start) < end && timeToMinutes(b.end) > start);
+
+  return (
+    <span className={cn("basis-full text-xs", clash ? "font-semibold text-coral-700" : "text-text-3")} role={clash ? "alert" : undefined}>
+      {clash
+        ? "La cancha ya está ocupada en ese horario. "
+        : loaded.busy.length === 0
+          ? "La cancha está libre todo ese día."
+          : ""}
+      {loaded.busy.length > 0 && `Ocupada: ${loaded.busy.map((b) => `${b.start}–${b.end}`).join(" · ")}`}
+    </span>
   );
 }

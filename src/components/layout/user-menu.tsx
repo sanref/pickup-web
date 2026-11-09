@@ -17,11 +17,14 @@ export function UserMenu({
   email,
   avatarUrl,
   isAdmin,
+  managesVenues,
 }: {
   name: string;
   email: string;
   avatarUrl: string | null;
   isAdmin: boolean;
+  /** Es admin de alguna sede. */
+  managesVenues: boolean;
 }) {
   return (
     <DropdownMenu>
@@ -43,6 +46,11 @@ export function UserMenu({
         <DropdownMenuItem asChild>
           <Link href="/mis-partidos">Mis partidos</Link>
         </DropdownMenuItem>
+        {managesVenues && (
+          <DropdownMenuItem asChild>
+            <Link href="/gestion">Mis sedes</Link>
+          </DropdownMenuItem>
+        )}
         {isAdmin && (
           <DropdownMenuItem asChild>
             <Link href="/admin/sedes">Moderar sedes</Link>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { requireOnboardedActor } from "@/server/auth/session";
 import { listActiveSports, listUserSports } from "@/server/services/profiles";
+import { listCourtsForMatch } from "@/server/services/venue-admin";
 import { getVenue, type VenueSummary } from "@/server/services/venues";
 import { NewMatchWizard } from "./new-match-wizard";
 
@@ -25,10 +26,14 @@ export default async function NewMatchPage({ searchParams }: PageProps<"/partido
   const preferred = presetVenue
     ? (mySports.find((s) => presetVenue.sports.some((vs) => vs.id === s.sportId))?.sportId ?? null)
     : (mySports[0]?.sportId ?? null);
+  // Mismo criterio que el asistente para el deporte inicial: si la sede tiene canchas de ese deporte,
+  // el asistente arranca en "¿Dónde?" para que se pueda elegir la cancha.
+  const presetSport = presetVenue?.sports.length === 1 ? presetVenue.sports[0].id : preferred;
+  const presetCourts = presetVenue && presetSport ? await listCourtsForMatch(presetVenue.id, presetSport) : [];
 
   return (
     <div className="px-4 py-8 min-[900px]:px-10">
-      <NewMatchWizard sports={sports} preferredSportId={preferred} presetVenue={presetVenue} />
+      <NewMatchWizard sports={sports} preferredSportId={preferred} presetVenue={presetVenue} presetHasCourts={presetCourts.length > 0} />
     </div>
   );
 }

@@ -3,9 +3,10 @@
 // los cambios de esquema van en db/evolution y después se regenera este archivo.
 import type { PgTableExtraConfigValue } from "drizzle-orm/pg-core"
 import { geographyPoint } from "../custom-types"
-import { pgTable, check, uuid, text, timestamp, unique, smallint, boolean, index, foreignKey, type AnyPgColumn, numeric, char, jsonb, primaryKey, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, check, uuid, text, timestamp, unique, smallint, boolean, index, foreignKey, type AnyPgColumn, jsonb, uniqueIndex, numeric, char, primaryKey, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
+export const bookingStatus = pgEnum("booking_status", ['booked', 'cancelled'])
 export const matchGender = pgEnum("match_gender", ['mixed', 'male', 'female'])
 export const matchStatus = pgEnum("match_status", ['draft', 'open', 'confirmed', 'played', 'cancelled'])
 export const matchVisibility = pgEnum("match_visibility", ['public', 'private'])
@@ -109,68 +110,6 @@ export const teams = pgTable("teams", {
 	check("teams_name_check", sql`(char_length(name) >= 2) AND (char_length(name) <= 60)`),
 ]);
 
-export const matches = pgTable("matches", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	sportId: smallint("sport_id").notNull(),
-	venueId: uuid("venue_id").notNull(),
-	organizerId: uuid("organizer_id").notNull(),
-	teamId: uuid("team_id"),
-	title: text().notNull(),
-	description: text(),
-	capacity: smallint().notNull(),
-	level: skillLevel(),
-	gender: matchGender().default('mixed').notNull(),
-	pricePerPerson: numeric("price_per_person", { precision: 10, scale:  2 }),
-	currency: char({ length: 3 }).default('ARS').notNull(),
-	visibility: matchVisibility().default('public').notNull(),
-	inviteCode: text("invite_code").notNull(),
-	status: matchStatus().default('open').notNull(),
-	autoConfirm: boolean("auto_confirm").default(false).notNull(),
-	votingDeadline: timestamp("voting_deadline", { withTimezone: true, mode: 'date' }),
-	confirmedSlotId: uuid("confirmed_slot_id"),
-	contactLink: text("contact_link"),
-	confirmedAt: timestamp("confirmed_at", { withTimezone: true, mode: 'date' }),
-	cancelledAt: timestamp("cancelled_at", { withTimezone: true, mode: 'date' }),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
-}, (table): PgTableExtraConfigValue[] => [
-	index("matches_organizer_idx").using("btree", table.organizerId.asc().nullsLast().op("uuid_ops")),
-	index("matches_status_sport_idx").using("btree", table.status.asc().nullsLast().op("int2_ops"), table.sportId.asc().nullsLast().op("int2_ops")),
-	index("matches_team_idx").using("btree", table.teamId.asc().nullsLast().op("uuid_ops")).where(sql`(team_id IS NOT NULL)`),
-	index("matches_venue_idx").using("btree", table.venueId.asc().nullsLast().op("uuid_ops")),
-	foreignKey({
-			columns: [table.sportId],
-			foreignColumns: [sports.id],
-			name: "matches_sport_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.venueId],
-			foreignColumns: [venues.id],
-			name: "matches_venue_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.organizerId],
-			foreignColumns: [profiles.userId],
-			name: "matches_organizer_id_fkey"
-		}),
-	foreignKey({
-			columns: [table.teamId],
-			foreignColumns: [teams.id],
-			name: "matches_team_id_fkey"
-		}).onDelete("set null"),
-	foreignKey({
-			columns: [table.id, table.confirmedSlotId],
-			foreignColumns: [matchSlots.id, matchSlots.matchId],
-			name: "matches_confirmed_slot_fk"
-		}),
-	unique("matches_invite_code_key").on(table.inviteCode),
-	check("matches_title_check", sql`(char_length(title) >= 3) AND (char_length(title) <= 80)`),
-	check("matches_description_check", sql`char_length(description) <= 1000`),
-	check("matches_capacity_check", sql`(capacity >= 2) AND (capacity <= 30)`),
-	check("matches_price_per_person_check", sql`price_per_person >= (0)::numeric`),
-	check("matches_confirmed_has_slot", sql`(status <> ALL (ARRAY['confirmed'::match_status, 'played'::match_status])) OR (confirmed_slot_id IS NOT NULL)`),
-]);
-
 export const matchSlots = pgTable("match_slots", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	matchId: uuid("match_id").notNull(),
@@ -215,6 +154,141 @@ export const notifications = pgTable("notifications", {
 		}).onDelete("cascade"),
 ]);
 
+export const courts = pgTable("courts", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	venueId: uuid("venue_id").notNull(),
+	name: text().notNull(),
+	sportId: smallint("sport_id").notNull(),
+	slotMinutes: smallint("slot_minutes").notNull(),
+	isActive: boolean("is_active").default(true).notNull(),
+	sortOrder: smallint("sort_order").default(0).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+}, (table): PgTableExtraConfigValue[] => [
+	index("courts_venue_idx").using("btree", table.venueId.asc().nullsLast().op("int2_ops"), table.sortOrder.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.venueId],
+			foreignColumns: [venues.id],
+			name: "courts_venue_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.sportId],
+			foreignColumns: [sports.id],
+			name: "courts_sport_id_fkey"
+		}),
+	unique("courts_venue_name_key").on(table.venueId, table.name),
+	unique("courts_id_venue_key").on(table.venueId, table.id),
+	check("courts_name_check", sql`(char_length(name) >= 1) AND (char_length(name) <= 60)`),
+	check("courts_slot_minutes_check", sql`((slot_minutes >= 15) AND (slot_minutes <= 240)) AND (((slot_minutes)::integer % 15) = 0)`),
+]);
+
+export const courtBookings = pgTable("court_bookings", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	courtId: uuid("court_id").notNull(),
+	startsAt: timestamp("starts_at", { withTimezone: true, mode: 'date' }).notNull(),
+	endsAt: timestamp("ends_at", { withTimezone: true, mode: 'date' }).notNull(),
+	status: bookingStatus().default('booked').notNull(),
+	matchId: uuid("match_id"),
+	customerName: text("customer_name"),
+	customerPhone: text("customer_phone"),
+	notes: text(),
+	createdBy: uuid("created_by"),
+	cancelledAt: timestamp("cancelled_at", { withTimezone: true, mode: 'date' }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+}, (table): PgTableExtraConfigValue[] => [
+	index("court_bookings_court_starts_idx").using("btree", table.courtId.asc().nullsLast().op("timestamptz_ops"), table.startsAt.asc().nullsLast().op("uuid_ops")),
+	uniqueIndex("court_bookings_match_active_key").using("btree", table.matchId.asc().nullsLast().op("uuid_ops")).where(sql`((status = 'booked'::booking_status) AND (match_id IS NOT NULL))`),
+	foreignKey({
+			columns: [table.courtId],
+			foreignColumns: [courts.id],
+			name: "court_bookings_court_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.matchId],
+			foreignColumns: [matches.id],
+			name: "court_bookings_match_id_fkey"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.createdBy],
+			foreignColumns: [profiles.userId],
+			name: "court_bookings_created_by_fkey"
+		}),
+	check("court_bookings_customer_name_check", sql`char_length(customer_name) <= 80`),
+	check("court_bookings_customer_phone_check", sql`char_length(customer_phone) <= 40`),
+	check("court_bookings_notes_check", sql`char_length(notes) <= 500`),
+	check("court_bookings_valid_range", sql`ends_at > starts_at`),
+]);
+
+export const matches = pgTable("matches", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	sportId: smallint("sport_id").notNull(),
+	venueId: uuid("venue_id").notNull(),
+	organizerId: uuid("organizer_id").notNull(),
+	teamId: uuid("team_id"),
+	title: text().notNull(),
+	description: text(),
+	capacity: smallint().notNull(),
+	level: skillLevel(),
+	gender: matchGender().default('mixed').notNull(),
+	pricePerPerson: numeric("price_per_person", { precision: 10, scale:  2 }),
+	currency: char({ length: 3 }).default('ARS').notNull(),
+	visibility: matchVisibility().default('public').notNull(),
+	inviteCode: text("invite_code").notNull(),
+	status: matchStatus().default('open').notNull(),
+	autoConfirm: boolean("auto_confirm").default(false).notNull(),
+	votingDeadline: timestamp("voting_deadline", { withTimezone: true, mode: 'date' }),
+	confirmedSlotId: uuid("confirmed_slot_id"),
+	contactLink: text("contact_link"),
+	confirmedAt: timestamp("confirmed_at", { withTimezone: true, mode: 'date' }),
+	cancelledAt: timestamp("cancelled_at", { withTimezone: true, mode: 'date' }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+	courtId: uuid("court_id"),
+}, (table): PgTableExtraConfigValue[] => [
+	index("matches_court_idx").using("btree", table.courtId.asc().nullsLast().op("uuid_ops")).where(sql`(court_id IS NOT NULL)`),
+	index("matches_organizer_idx").using("btree", table.organizerId.asc().nullsLast().op("uuid_ops")),
+	index("matches_status_sport_idx").using("btree", table.status.asc().nullsLast().op("enum_ops"), table.sportId.asc().nullsLast().op("int2_ops")),
+	index("matches_team_idx").using("btree", table.teamId.asc().nullsLast().op("uuid_ops")).where(sql`(team_id IS NOT NULL)`),
+	index("matches_venue_idx").using("btree", table.venueId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.sportId],
+			foreignColumns: [sports.id],
+			name: "matches_sport_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.venueId],
+			foreignColumns: [venues.id],
+			name: "matches_venue_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.organizerId],
+			foreignColumns: [profiles.userId],
+			name: "matches_organizer_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.teamId],
+			foreignColumns: [teams.id],
+			name: "matches_team_id_fkey"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.id, table.confirmedSlotId],
+			foreignColumns: [matchSlots.id, matchSlots.matchId],
+			name: "matches_confirmed_slot_fk"
+		}),
+	foreignKey({
+			columns: [table.venueId, table.courtId],
+			foreignColumns: [courts.id, courts.venueId],
+			name: "matches_court_fk"
+		}),
+	unique("matches_invite_code_key").on(table.inviteCode),
+	check("matches_title_check", sql`(char_length(title) >= 3) AND (char_length(title) <= 80)`),
+	check("matches_description_check", sql`char_length(description) <= 1000`),
+	check("matches_capacity_check", sql`(capacity >= 2) AND (capacity <= 30)`),
+	check("matches_price_per_person_check", sql`price_per_person >= (0)::numeric`),
+	check("matches_confirmed_has_slot", sql`(status <> ALL (ARRAY['confirmed'::match_status, 'played'::match_status])) OR (confirmed_slot_id IS NOT NULL)`),
+]);
+
 export const venueSports = pgTable("venue_sports", {
 	venueId: uuid("venue_id").notNull(),
 	sportId: smallint("sport_id").notNull(),
@@ -248,6 +322,31 @@ export const userSports = pgTable("user_sports", {
 			name: "user_sports_sport_id_fkey"
 		}),
 	primaryKey({ columns: [table.userId, table.sportId], name: "user_sports_pkey"}),
+]);
+
+export const venueManagers = pgTable("venue_managers", {
+	venueId: uuid("venue_id").notNull(),
+	userId: uuid("user_id").notNull(),
+	addedBy: uuid("added_by"),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+}, (table): PgTableExtraConfigValue[] => [
+	index("venue_managers_user_idx").using("btree", table.userId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.venueId],
+			foreignColumns: [venues.id],
+			name: "venue_managers_venue_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [profiles.userId],
+			name: "venue_managers_user_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.addedBy],
+			foreignColumns: [profiles.userId],
+			name: "venue_managers_added_by_fkey"
+		}),
+	primaryKey({ columns: [table.venueId, table.userId], name: "venue_managers_pkey"}),
 ]);
 
 export const teamMembers = pgTable("team_members", {

@@ -82,6 +82,7 @@ export default async function MatchPage({ params, searchParams }: PageProps<"/pa
           <Link href={`/sedes/${match.venue.id}`} className="text-lg font-semibold tracking-[-0.02em] text-text no-underline">
             {match.venue.name}
           </Link>
+          {match.court && <span className="text-sm text-text-2">{match.court.name}</span>}
           <span className="text-[13px] text-text-3">
             {match.venue.address} · {match.venue.city}
           </span>
